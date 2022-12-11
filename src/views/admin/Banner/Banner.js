@@ -20,7 +20,7 @@ import {
 } from "reactstrap";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ToastContainer,toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 
 import * as bannerService from '~/services/bannerService'
 import { BannerType } from "~/common/bannerTypeEnum";
@@ -29,15 +29,12 @@ import ModalPopup from "~/components/ModalPopup";
 const Banner = () => {
   const limit = 5
   const keyBanner = Object.keys(BannerType)
-  const [loading,setLoading]=useState(false)
+  const [loading, setLoading] = useState(false)
   const [banners, setBanners] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
-  const [typeBanner, setTypeBanner] = useState(BannerType.All)
   const [totalPage, setTotalPage] = useState(0)
-
-  const handleChangePage = (e) => {
-    setCurrentPage(+e.target.innerText)
-  }
+  const [typeBanner, setTypeBanner] = useState(BannerType.All)
+  const [keySearch, setKeySearch] = useState('')
 
   // params
   let params = {
@@ -46,9 +43,14 @@ const Banner = () => {
     fields: 'id,title,type'
   }
   const getBannersApi = async () => {
-    console.log('create-getBannersApi()');
-    const body = typeBanner ? { type: +typeBanner } : {}
+    const body = {
+      type: typeBanner,
+      title: keySearch
+    }
+
+    setLoading(true)
     const res = await bannerService.getAll(body, params);
+    setLoading(false)
     if (res.status === 200) {
       setTotalPage(res.data.totalPages);
       setBanners(res.data.data)
@@ -60,7 +62,7 @@ const Banner = () => {
     for (let i = 1; i <= totalPage; i++) {
       listPaging.push(<PaginationItem key={i} className={currentPage === i ? "active" : ''}>
         <PaginationLink
-          onClick={(e) => handleChangePage(e)}
+          onClick={(e) => setCurrentPage(+e.target.innerText)}
         >
           {i}
         </PaginationLink>
@@ -81,14 +83,16 @@ const Banner = () => {
     setLoading(false)
   }
 
-  const handleFilterBanner = (type) => {
-    setTypeBanner(+type)
+  const handleEnterSearch = (e) => {
+    if (e.key === 'Enter') {
+      setKeySearch(e.target.value)
+    }
   }
 
   useEffect(() => {
     getBannersApi()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, typeBanner])
+  }, [currentPage, typeBanner, keySearch])
   return (
     <>
       {/* Page content */}
@@ -101,7 +105,7 @@ const Banner = () => {
                 <h3 className="mb-0">Banners</h3>
                 <div className="d-flex justify-content-between w-50">
                   {/* Dropdown */}
-                  <UncontrolledDropdown className="">
+                  <UncontrolledDropdown>
                     <DropdownToggle
                       caret
                       color="primary"
@@ -111,14 +115,14 @@ const Banner = () => {
                     </DropdownToggle>
                     <DropdownMenu>
                       {keyBanner.map((item, index) => (
-                        <DropdownItem key={index} onClick={() => handleFilterBanner(BannerType[item])}>
+                        <DropdownItem key={index} onClick={() => setTypeBanner(+BannerType[item])}>
                           {item}
                         </DropdownItem>
                       ))}
                     </DropdownMenu>
                   </UncontrolledDropdown>
 
-                  <Input className="mr-3" placeholder="Search" type="text" />
+                  <Input className="mr-3" placeholder="Search" type="text" onKeyDown={handleEnterSearch} />
                   <Link to='/admin/banner/create' className=" btn btn-icon btn-success d-flex" type="button">
                     <span className="btn-inner--icon">
                       <i className="fas fa-plus"></i>
@@ -131,12 +135,12 @@ const Banner = () => {
               <Table className="align-items-center table-flush" responsive>
                 <thead className="thead-light text-center">
                   <tr>
-                    <th scope="col" style={{width:'5%'}}>no.</th>
-                    <th scope="col" style={{width:'10%'}}>title</th>
-                    <th scope="col" style={{width:'60%'}}>image</th>
-                    <th scope="col" style={{width:'10%'}}>type</th>
-                    <th scope="col" style={{width:'10%'}}>status</th>
-                    <th scope="col" style={{width:'5%'}}/>
+                    <th scope="col" style={{ width: '5%' }}>no.</th>
+                    <th scope="col" style={{ width: '10%' }}>title</th>
+                    <th scope="col" style={{ width: '60%' }}>image</th>
+                    <th scope="col" style={{ width: '10%' }}>type</th>
+                    <th scope="col" style={{ width: '10%' }}>status</th>
+                    <th scope="col" style={{ width: '5%' }} />
                   </tr>
                 </thead>
 
@@ -184,10 +188,10 @@ const Banner = () => {
                               <i className="fas fa-ellipsis-v" />
                             </DropdownToggle>
                             <DropdownMenu className="dropdown-menu-arrow" right>
-                              <DropdownItem
-                              >
-                                <Link to={`/admin/banner/edit/${item.id}`}>Edit</Link>
-                              </DropdownItem>
+                              <Link to={`/admin/banner/edit/${item.id}`}>
+                                <DropdownItem>Edit</DropdownItem>
+                              </Link>
+
                               <DropdownItem
                                 onClick={(e) => { e.preventDefault(); handleInActive(item.id) }}
                               >

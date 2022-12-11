@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 import {
   Button,
   Card,
@@ -16,26 +17,26 @@ import {
   Row,
   Col
 } from "reactstrap";
+import ModalPopup from "~/components/ModalPopup";
 
 import * as authService from '~/services/authService'
 import { login } from '~/slices/authSlice';
 
 const Login = () => {
-  const [error, setError] = useState({
-    email: '',
-    password: '',
-  });
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false)
 
   const handleLogin = (e) => {
     e.preventDefault();
     const loginApi = async () => {
+      setLoading(true)
       const res = await authService.login({ email: e.target.email.value, password: e.target.password.value })
+      setLoading(false)
       if (res.status === 200) {
         const action = login(res.data);
         dispatch(action);
       } else {
-        setError({ ...res.errors });
+        toast.error(res.errors.message)
       }
     }
     loginApi()
@@ -90,7 +91,7 @@ const Login = () => {
               <small>Or sign in with credentials</small>
             </div>
             <Form role="form" onSubmit={handleLogin}>
-              <FormGroup className={error.email && error.email.length > 0 ? "mb-3 has-danger" : "mb-3"}>
+              <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
                     <InputGroupText>
@@ -106,9 +107,8 @@ const Login = () => {
                   />
 
                 </InputGroup>
-                <span className="text-danger font-italic">{error.email}</span>
               </FormGroup>
-              <FormGroup className={error.password && error.password.length > 0 ? "mb-3 has-danger" : "mb-3"}>
+              <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
                     <InputGroupText>
@@ -122,7 +122,6 @@ const Login = () => {
                     name="password"
                   />
                 </InputGroup>
-                <span className="text-danger font-italic">{error.password}</span>
               </FormGroup>
               <div className="text-center">
                 <Button className="my-4" color="primary" type="submit">
@@ -152,6 +151,8 @@ const Login = () => {
           </Col>
         </Row>
       </Col>
+      <ToastContainer />
+      <ModalPopup hidden={!loading} />
     </>
   );
 };

@@ -1,6 +1,6 @@
 // reactstrap components
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
     Input,
     Card,
@@ -40,17 +40,8 @@ function CreateBanner() {
         type: BannerType.Slider,
         status: 1
     })
-
     const keyBanners = Object.keys(BannerType)
     keyBanners.shift()
-
-    const bannerId = function () {
-        const pathname = window.location.pathname
-        if (pathname.includes('/admin/banner/edit')) {
-            return +pathname.split('/').at(-1)
-        }
-        return 0
-    }()
 
     const inputPictureOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
@@ -70,13 +61,13 @@ function CreateBanner() {
             const resUploadFile = await fileService.upload(formData)
             if (resUploadFile.status === 201) {
                 bannerObj.photo = resUploadFile.data.id
-             
+
                 const reqBanner = await bannerService.create(bannerObj);
                 setLoading(false)
                 if (reqBanner.status === 200) {
-                    toast.success('Create Successfully!')
+                    toast.success('Save Successfully!')
                 } else {
-                    toast.error('Create Fail!')
+                    toast.error(reqBanner.errors.message)
                 }
 
             } else {
@@ -85,23 +76,6 @@ function CreateBanner() {
         }
     }
 
-    useEffect(() => {
-        // fetch API
-        const getBannerById = async () => {
-            setLoading(true)
-            const res = await bannerService.getBannerById(bannerId)
-            if (res.status === 200) {
-                let { id, link, title, type, photo, status } = res.data
-                console.log({ id, link, title, type, photo, status });
-                setBannerObj({ id, link, title, photo: photo.id, path: photo.path, type, status: status.id })
-            }
-            setLoading(false)
-        }
-        if (bannerId) {
-            getBannerById()
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
 
     return (
         <Container className="mt--7" fluid>
@@ -127,7 +101,7 @@ function CreateBanner() {
                                                 type="text"
                                                 name="title"
                                                 defaultValue={bannerObj.title}
-                                                onChange={(e)=>setBannerObj({...bannerObj,title:e.target.value})}
+                                                onChange={(e) => setBannerObj({ ...bannerObj, title: e.target.value })}
                                             />
                                         </FormGroup>
                                         <FormGroup>
@@ -143,7 +117,7 @@ function CreateBanner() {
                                                 type="text"
                                                 name="link"
                                                 defaultValue={bannerObj.link}
-                                                onChange={(e)=>setBannerObj({...bannerObj,link:e.target.value})}
+                                                onChange={(e) => setBannerObj({ ...bannerObj, link: e.target.value })}
                                             />
                                         </FormGroup>
                                         <FormGroup>
@@ -154,7 +128,7 @@ function CreateBanner() {
                                                     className="mr-3"
 
                                                 >
-                                                    {keyBanners[bannerObj.type-1]}
+                                                    {keyBanners[bannerObj.type - 1]}
                                                 </DropdownToggle>
                                                 <DropdownMenu>
                                                     {keyBanners.map((item, index) => (

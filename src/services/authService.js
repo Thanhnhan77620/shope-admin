@@ -2,7 +2,7 @@ import * as httpRequest from '~/utils/httpRequest';
 const token = JSON.parse(localStorage.getItem('token')) || null;
 
 export const login = async (userLogin) => {
-    const res = await httpRequest.post('auth/email/login', { ...userLogin });
+    const res = await httpRequest.post('auth/admin/email/login', { ...userLogin });
     return res;
 };
 

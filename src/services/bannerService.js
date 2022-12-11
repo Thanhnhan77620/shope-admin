@@ -45,3 +45,14 @@ export const create = async (body = {}) => {
     const res = await httpRequest.post('banners/', body, configHeader)
     return res;
 };
+
+export const update = async (body = {}) => {
+    const configHeader = {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    }
+    const res = await httpRequest.patch('banners/' + body.id, body, configHeader)
+    return res;
+};

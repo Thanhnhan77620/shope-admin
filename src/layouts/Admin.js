@@ -8,6 +8,7 @@ import Sidebar from "~/components/Sidebar/Sidebar.js";
 import Header from "~/components/Headers/Header";
 
 import routes from "~/routes";
+import { useSelector } from "react-redux";
 
 const Admin = (props) => {
   const mainContent = useRef(null);
@@ -65,7 +66,7 @@ const Admin = (props) => {
         />
         <Header />
         <Switch>
-          {props.isLogged ? <>{getRoutes(routes)} <Redirect from="*" to="/admin/index" /></> : <Redirect from="*" to="/auth/login" />}
+          {props.isLogged ? <>{getRoutes(routes)}</> : <Redirect from="*" to="/auth/login" />}
         </Switch>
       </div>
     </>

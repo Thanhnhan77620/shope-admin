@@ -1,6 +1,7 @@
 // reactstrap components
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
 import {
     Input,
     Card,
@@ -20,54 +21,96 @@ import {
     from "reactstrap";
 
 import { BannerType } from "~/common/bannerTypeEnum";
+import ModalPopup from "~/components/ModalPopup";
 import * as bannerService from '~/services/bannerService'
+import * as fileService from '~/services/fileService'
 
-function EditBanner({ banner = {} }) {
-    banner = {
-        title: 'banner 1',
-        type: 1,
-        link: 'link',
-        photo: {
-            id: "d9872e82-ef02-4ae0-84f1-863e49f1de7c",
-            path: "https://demos.creative-tim.com/argon-design-system-pro/assets/img/faces/team-1.jpg",
-        },
-    }
-    const getBannerById = async () => {
-        const pathname=window.location.pathname
-        let bannerId=0
-        if (pathname.includes('/admin/banner/edit')) {
-            bannerId=+pathname.split('/').at(-1)
-        }
-        const res = await bannerService.getBannerById(bannerId)
-        console.log(res);
-    }
-    
+function EditBanner() {
+    const [loading, setLoading] = useState(false)
+    const { id } = useParams();
 
-    const [typeBanner, setTypeBanner] = useState(BannerType.All)
-    const [previewPicture, setPreviewPicture] = useState('')
+    const [bannerObj, setBannerObj] = useState({
+        id: id,
+        title: '',
+        link: '',
+        photo: '',
+        path: '',
+        type: BannerType.Slider,
+        status: 1
+    })
 
-    const keyBanner = Object.keys(BannerType)
+    const keyBanners = Object.keys(BannerType)
+    keyBanners.shift()
+
     const inputFile = useRef()
 
-    const handleFilterBanner = (type) => {
-        setTypeBanner(+type)
-    }
-    const handleSubmit = (e) => {
+    const isNullObj = Object.values(bannerObj).some(value => value === null || value === undefined || value === '')
+
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        console.log();
+        const file = inputFile && inputFile.current.files[0];
+
+        if (file) {
+            var formData = new FormData();
+            formData.append('file', file);
+
+            setLoading(true)
+            const resUploadFile = await fileService.upload(formData)
+            if (resUploadFile.status === 201) {
+                bannerObj.photo = resUploadFile.data.id
+
+                upLoadBanner(bannerObj)
+            } else {
+                alert(resUploadFile);
+            }
+        } else {
+            if (!isNullObj) {
+                upLoadBanner(bannerObj)
+            }
+
+        }
     }
+
+    const upLoadBanner = async (bannerObj) => {
+        setLoading(true)
+        const reqBanner = await bannerService.update(bannerObj);
+        setLoading(false)
+        console.log(reqBanner);
+        if (reqBanner.status === 200) {
+            toast.success('Save Successfully!')
+        } else {
+            toast.error(reqBanner.errors.message)
+        }
+        setLoading(false)
+    }
+
     const inputPictureOnchange = (e) => {
-        console.log(Boolean(e.target.files.length));
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+            setBannerObj({ ...bannerObj, path: URL.createObjectURL(file) })
+        }
     }
+
     const handleUpload = () => {
         inputFile.current.click()
     }
-    
 
     useEffect(() => {
-        getBannerById()
+        // fetch API
+        const getBannerById = async () => {
+            setLoading(true)
+            const res = await bannerService.getBannerById(id)
+            if (res.status === 200) {
+                let { id, link, title, type, photo, status } = res.data
+                setBannerObj({ id, link, title, photo: photo.id, path: photo.path, type, status: status.id })
+            }
+            setLoading(false)
+        }
+        if (+id) {
+            getBannerById()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
-
     return (
         <Container className="mt--7" fluid>
             <Row>
@@ -90,8 +133,9 @@ function EditBanner({ banner = {} }) {
                                                 className="form-control-alternative"
                                                 placeholder="Banner 1"
                                                 type="text"
-                                                defaultValue={banner.title}
                                                 name="title"
+                                                value={bannerObj.title}
+                                                onChange={(e) => setBannerObj({ ...bannerObj, title: e.target.value })}
                                             />
                                         </FormGroup>
                                         <FormGroup>
@@ -105,8 +149,9 @@ function EditBanner({ banner = {} }) {
                                                 className="form-control-alternative"
                                                 placeholder="https://demos.creative-tim.com"
                                                 type="text"
-                                                defaultValue={banner.link}
                                                 name="link"
+                                                value={bannerObj.link}
+                                                onChange={(e) => setBannerObj({ ...bannerObj, link: e.target.value })}
                                             />
                                         </FormGroup>
                                         <FormGroup>
@@ -117,11 +162,11 @@ function EditBanner({ banner = {} }) {
                                                     className="mr-3"
 
                                                 >
-                                                    {keyBanner[banner.type]}
+                                                    {keyBanners[bannerObj.type - 1]}
                                                 </DropdownToggle>
                                                 <DropdownMenu>
-                                                    {keyBanner.map((item, index) => (
-                                                        <DropdownItem key={index} onClick={() => handleFilterBanner(BannerType[item])}>
+                                                    {keyBanners.map((item, index) => (
+                                                        <DropdownItem key={index} onClick={() => setBannerObj({ ...bannerObj, type: BannerType[item] })}>
                                                             {item}
                                                         </DropdownItem>
                                                     ))}
@@ -143,7 +188,7 @@ function EditBanner({ banner = {} }) {
                                                 className="rounded shadow"
                                                 width='100%'
                                                 height='400px'
-                                                src={banner.photo.path}
+                                                src={bannerObj.path}
                                                 onClick={handleUpload}
                                                 style={{ cursor: 'pointer' }}
                                             ></img>
@@ -154,7 +199,7 @@ function EditBanner({ banner = {} }) {
                                     <Button className="btn btn-icon btn-success" type="submit" style={{ minWidth: '100px' }}>
                                         <span className="btn-inner--text">Save</span>
                                     </Button>
-                                    <Link to='/admin/create' className=" btn btn-icon btn-danger" type="button" style={{ minWidth: '100px' }}>
+                                    <Link to='/admin/banners' className=" btn btn-icon btn-danger" type="button" style={{ minWidth: '100px' }}>
                                         <span className="btn-inner--text">Cancel</span>
                                     </Link>
                                 </div>
@@ -164,6 +209,8 @@ function EditBanner({ banner = {} }) {
                     </Card>
                 </div>
             </Row>
+            <ToastContainer />
+            <ModalPopup hidden={!loading} />
         </Container>
     );
 }

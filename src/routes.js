@@ -7,46 +7,17 @@ import { Banner, CreateBanner, CreateEditBanner, EditBanner } from "~/views/admi
 import Icons from "~/views/admin/Icons.js";
 
 var routes = [
+  //index
   {
     path: "/index",
     name: "Dashboard",
     icon: "ni ni-tv-2 text-primary",
     component: Index,
-    layout: "/admin"
+    layout: "/admin",
+    sideBar: true
   },
-  // {
-  //   path: "/banner",
-  //   name: "Banners",
-  //   icon: "ni ni-planet text-blue",
-  //   layout: "/admin",
-  //   subSidebars: [
-  //     {
-  //       path: "/",
-  //       name: "List Banner",
-  //       icon: "ni ni-planet text-blue",
-  //       component: Banner,
-  //     },
-  //     {
-  //       path: "/create",
-  //       name: "Create Banner",
-  //       icon: "ni ni-planet text-blue",
-  //       component: CreateEditBanner,
-  //     },
-  //     {
-  //       path: "/edit",
-  //       name: "Edit Banner",
-  //       icon: "ni ni-planet text-blue",
-  //       component: CreateEditBanner,
-  //     }
-  //   ]
-  // },
-  // {
-  //   path: "/maps",
-  //   name: "Maps",
-  //   icon: "ni ni-pin-3 text-orange",
-  //   component: Maps,
-  //   layout: "/admin"
-  // },
+
+  //user
   {
     path: "/user-profile",
     name: "User Profile",
@@ -54,12 +25,15 @@ var routes = [
     component: Profile,
     layout: "/admin"
   },
+
+  // banner
   {
     path: "/banners",
     name: "Banners",
     icon: "ni ni-bullet-list-67 text-red",
     component: Banner,
-    layout: "/admin"
+    layout: "/admin",
+    sideBar: true
   },
   {
     path: "/banner/create",
@@ -69,12 +43,14 @@ var routes = [
     layout: "/admin"
   },
   {
-    path: "/banner/edit/98",
+    path: "/banner/edit/:id",
     name: "Edit Banner",
     icon: "ni ni-bullet-list-67 text-red",
-    component: CreateBanner,
-    layout: "/admin"
+    component: EditBanner,
+    layout: "/admin",
   },
+
+  //login
   {
     path: "/login",
     name: "Login",
@@ -82,6 +58,8 @@ var routes = [
     component: Login,
     layout: "/auth"
   },
+
+  //logout
   {
     path: "/register",
     name: "Register",

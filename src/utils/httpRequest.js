@@ -12,8 +12,8 @@ export const get = async (path, body = {}) => {
         const { data, status } = response;
         return { data, status };
     } catch (error) {
-        const { errors, status } = error.response.data
-        return { errors, status };
+        const { errors, statusCode } = error.response.data
+        return { errors, status: statusCode };
     }
 };
 
@@ -23,16 +23,6 @@ export const post = async (path, body = {}, config = {}) => {
         const { data, status } = response;
         return { data, status };
     } catch (error) {
-        //error.response.data
-        // {
-        //     "statusCode": 422,
-        //     "errors": {
-        //         "title": "titleAlreadyExists"
-        //     },
-        //     "timestamp": "2022-11-22T15:29:19.244Z",
-        //     "path": "/api/v1/banners"
-        // }
-        console.log(error);
         const { errors, statusCode } = error.response.data
         return { errors, status: statusCode };
     }
@@ -44,8 +34,8 @@ export const patch = async (path, body = {}, config = {}) => {
         const { data, status } = response;
         return { data, status };
     } catch (error) {
-        const { errors, status } = error.response.data
-        return { errors, status };
+        const { errors, statusCode } = error.response.data
+        return { errors, status: statusCode };
     }
 };
 
@@ -55,8 +45,8 @@ export const remove = async (path, config = {}) => {
         const { data, status } = response;
         return { data, status };
     } catch (error) {
-        const { errors, status } = error.response.data
-        return { errors, status };
+        const { errors, statusCode } = error.response.data
+        return { errors, status: statusCode };
     }
 };
 
