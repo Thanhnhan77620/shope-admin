@@ -52,8 +52,11 @@ const Banner = () => {
     const res = await bannerService.getAll(body, params);
     setLoading(false)
     if (res.status === 200) {
+      setCurrentPage(params.page)
       setTotalPage(res.data.totalPages);
       setBanners(res.data.data)
+    } else {
+      toast.error(res.errors.message)
     }
   }
 
@@ -62,7 +65,10 @@ const Banner = () => {
     for (let i = 1; i <= totalPage; i++) {
       listPaging.push(<PaginationItem key={i} className={currentPage === i ? "active" : ''}>
         <PaginationLink
-          onClick={(e) => setCurrentPage(+e.target.innerText)}
+          onClick={(e) => {
+            params.currentPage = +e.target.innerText
+            getBannersApi()
+          }}
         >
           {i}
         </PaginationLink>
@@ -78,7 +84,7 @@ const Banner = () => {
       toast.success('Delate Successfully!')
       getBannersApi()
     } else {
-      toast.error('Delate Fail!')
+      toast.error(res.errors.message)
     }
     setLoading(false)
   }

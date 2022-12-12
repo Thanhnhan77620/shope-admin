@@ -3,8 +3,9 @@ import Index from "~/views/Index.js";
 import Profile from "~/views/admin/Profile.js";
 import Maps from "~/views/admin/Maps.js";
 import { Login, Register } from "~/views/auth";
-import { Banner, CreateBanner, CreateEditBanner, EditBanner } from "~/views/admin/Banner";
-import Icons from "~/views/admin/Icons.js";
+import { Banner, CreateBanner, EditBanner } from "~/views/admin/Banner";
+import { Brand, CreateBrand, EditBrand } from "./views/admin/Brand";
+import { Category, CreateCategory, EditCategory } from "./views/admin/Category";
 
 var routes = [
   //index
@@ -48,6 +49,64 @@ var routes = [
     icon: "ni ni-bullet-list-67 text-red",
     component: EditBanner,
     layout: "/admin",
+  },
+
+  // category
+  {
+    path: "/categories",
+    name: "Categories",
+    icon: "ni ni-bullet-list-67 text-red",
+    component: Category,
+    layout: "/admin",
+    sideBar: true
+  },
+  {
+    path: "/category/create",
+    name: "Create Category",
+    icon: "ni ni-bullet-list-67 text-red",
+    component: CreateCategory,
+    layout: "/admin",
+  },
+  {
+    path: "/category/edit/:id",
+    name: "Edit Category",
+    icon: "ni ni-bullet-list-67 text-red",
+    component: EditCategory,
+    layout: "/admin",
+  },
+
+  // brand
+  {
+    path: "/brands",
+    name: "Brands",
+    icon: "ni ni-bullet-list-67 text-red",
+    component: Brand,
+    layout: "/admin",
+    sideBar: true
+  },
+  {
+    path: "/brand/create",
+    name: "Create Brand",
+    icon: "ni ni-bullet-list-67 text-red",
+    component: CreateBrand,
+    layout: "/admin",
+  },
+  {
+    path: "/brand/edit/:id",
+    name: "Edit Brand",
+    icon: "ni ni-bullet-list-67 text-red",
+    component: EditBrand,
+    layout: "/admin",
+  },
+
+  // product
+  {
+    path: "/products",
+    name: "Products",
+    icon: "ni ni-bullet-list-67 text-red",
+    component: Banner,
+    layout: "/admin",
+    sideBar: true
   },
 
   //login

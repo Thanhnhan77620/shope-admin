@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "argon-dashboard-react": "^1.2.0",
     "axios": "^0.27.2",
+    "multiselect-react-dropdown": "^2.0.25",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-pro-sidebar": "^0.7.1",
@@ -17,6 +18,8 @@
     "react-scripts": "5.0.1",
     "react-toastify": "^9.1.1",
     "sass": "^1.55.0",
+    "suneditor": "^2.44.3",
+    "suneditor-react": "^3.4.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

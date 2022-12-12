@@ -57,25 +57,24 @@ function EditBanner() {
             setLoading(true)
             const resUploadFile = await fileService.upload(formData)
             if (resUploadFile.status === 201) {
-                bannerObj.photo = resUploadFile.data.id
+                bannerObj.logo = resUploadFile.data.id
 
-                upLoadBanner(bannerObj)
+                updateBanner(bannerObj)
             } else {
                 alert(resUploadFile);
             }
         } else {
             if (!isNullObj) {
-                upLoadBanner(bannerObj)
+                updateBanner(bannerObj)
             }
 
         }
     }
 
-    const upLoadBanner = async (bannerObj) => {
+    const updateBanner = async (bannerObj) => {
         setLoading(true)
         const reqBanner = await bannerService.update(bannerObj);
         setLoading(false)
-        console.log(reqBanner);
         if (reqBanner.status === 200) {
             toast.success('Save Successfully!')
         } else {

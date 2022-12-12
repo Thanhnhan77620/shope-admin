@@ -54,7 +54,7 @@ const Sidebar = (props) => {
               to={prop.layout + prop.path}
               tag={NavLinkRRD}
               onClick={closeCollapse}
-              activeClassName="active"
+              activeClassName={activeRoute(prop.layout + prop.path)}
             >
               <i className={prop.icon} />
               {prop.name}
