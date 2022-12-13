@@ -1,9 +1,8 @@
 // reactstrap components
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Input, Card, CardHeader, CardBody, Container, Row, FormGroup, Form, Col, Button } from 'reactstrap';
 import { ToastContainer, toast } from 'react-toastify';
-import Multiselect from 'multiselect-react-dropdown';
 
 // client components
 import { BannerType } from '~/common/bannerTypeEnum';
@@ -14,44 +13,24 @@ import { RichText } from '~/components/RichText';
 import * as brandService from '~/services/brandService';
 import * as categoryService from '~/services/categoryService';
 import * as fileService from '~/services/fileService';
+import { MultiSelectDropdown } from '~/components/MultiSelectDropdown';
 
 function CreateBrand() {
     const [loading, setLoading] = useState(false);
-    const [pathLogo, setPathLogo] = useState('');
-    const [pathImage, setPathImage] = useState('');
     const [categories, setCategories] = useState([]);
     const [brandObj, setBrandObj] = useState({
         name: '',
         logo: '',
+        pathLogo: '',
         image: '',
+        pathImage: '',
         categories: [],
         description: '',
         status: 1,
     });
-
-    const inputName = useRef();
     const inputFileLogo = useRef();
     const inputFileImage = useRef();
 
-    // var brandObj = {
-    //     name: '',
-    //     logo: '',
-    //     image: '',
-    //     categories: [],
-    //     description: '',
-    //     status: 1,
-    // };
-
-    const getCategoriesApi = async () => {
-        setLoading(true);
-        const res = await categoryService.getAll({}, { fields: 'id,name' });
-        setLoading(false);
-        if (res.status === 200) {
-            setCategories(res.data.data);
-        } else {
-            toast.error(res.errors.message);
-        }
-    };
 
     const keyBanners = Object.keys(BannerType);
     keyBanners.shift();
@@ -59,75 +38,80 @@ function CreateBrand() {
     const inputLogoOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
-            setPathLogo(URL.createObjectURL(file));
+            setBrandObj({ ...brandObj, pathLogo: URL.createObjectURL(file) })
         }
     };
 
     const inputImageOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
-            setPathImage(URL.createObjectURL(file));
+            setBrandObj({ ...brandObj, pathImage: URL.createObjectURL(file) })
         }
     };
 
     const handleOnSelect = (selectedList, currentSelect) => {
-        brandObj.categories.push(currentSelect.id);
-    };
-    const handleOnRemove = (selectedList, currentSelect) => {
-        brandObj.categories = brandObj.categories.filter((e) => e !== currentSelect.id);
-    };
+        setBrandObj({ ...brandObj, categories: [...brandObj.categories, currentSelect.id] })
+    }
 
-    const handleOnBlur = (content) => {
-        brandObj.description = content.current.getContext();
-    };
+    const handleOnRemove = (selectedList, currentSelect) => {
+        setBrandObj({ ...brandObj, categories: brandObj.categories.filter(e => e !== currentSelect.id) })
+    }
+
+
+    const handleOnChangeContext = (editor) => {
+        setBrandObj(prevObj => ({
+            ...prevObj,
+            description: editor.current.getCharCount() ? editor.current.getContents() : ''
+        }))
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const fileLogo = inputFileLogo && inputFileLogo.current.files[0];
         const fileImage = inputFileImage && inputFileImage.current.files[0];
 
-        brandObj.name = inputName.current.value;
-
         if (fileLogo && fileImage && brandObj.name) {
-            console.log(brandObj);
-            // var formDataLogo = new FormData();
-            // formDataLogo.append('file', fileLogo);
+            var formDataLogo = new FormData();
+            formDataLogo.append('file', fileLogo);
 
-            // var formDataImage = new FormData();
-            // formDataImage.append('file', fileImage);
+            var formDataImage = new FormData();
+            formDataImage.append('file', fileImage);
 
-            // setLoading(true);
-            // const resUploadFileLogo = fileService.upload(formDataLogo);
-            // const resUploadFileImage = fileService.upload(formDataImage);
-            // Promise.all([resUploadFileLogo, resUploadFileImage])
-            //     .then(async (values) => {
-            //         brandObj.logo = values[0].data.id;
-            //         brandObj.image = values[1].data.id;
 
-            //         setLoading(true);
-            //         const reqBanner = await brandService.create(brandObj);
-            //         setLoading(false);
-            //         if (reqBanner.status === 201) {
-            //             toast.success('Save Successfully!');
-            //         } else {
-            //             toast.error(reqBanner.errors.message);
-            //         }
-            //     })
-            //     .catch((error) => toast.error(error));
+            const resUploadFileLogo = fileService.upload(formDataLogo);
+            const resUploadFileImage = fileService.upload(formDataImage);
+            setLoading(true);
+            Promise.all([resUploadFileLogo, resUploadFileImage])
+                .then(async (values) => {
+                    brandObj.logo = values[0].data.id;
+                    brandObj.image = values[1].data.id;
+                    console.log(brandObj);
+                    const reqBanner = await brandService.create(brandObj);
+                    setLoading(false);
+                    if (reqBanner.status === 201) {
+                        toast.success('Save Successfully!');
+                    } else {
+                        toast.error(reqBanner.errors.message);
+                    }
+                })
+                .catch((error) => toast.error(error));
         }
     };
 
-    const handleOnChangeInput = useCallback(
-        (e) => {
-            setBrandObj({ ...brandObj, name: e.target.value });
-        },
-        [],
-    );
-
     useEffect(() => {
+        const getCategoriesApi = async () => {
+            setLoading(true);
+            const res = await categoryService.getAll({}, { fields: 'id,name' });
+            setLoading(false);
+            if (res.status === 200) {
+                setCategories(res.data.data);
+            } else {
+                toast.error(res.errors.message);
+            }
+        };
+
         getCategoriesApi();
     }, []);
-    console.log(121312);
 
     return (
         <Container className="mt--7" fluid>
@@ -148,8 +132,7 @@ function CreateBrand() {
                                                 placeholder="Ex: Brand"
                                                 type="text"
                                                 name="name"
-                                                innerRef={inputName}
-                                                onChange={handleOnChangeInput}
+                                                onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -157,41 +140,12 @@ function CreateBrand() {
                                         <FormGroup>
                                             <label className="form-control-label">Categories</label>
                                             <div>
-                                                <Multiselect
+                                                <MultiSelectDropdown
                                                     onRemove={handleOnRemove}
                                                     onSelect={handleOnSelect}
                                                     options={categories}
-                                                    emptyRecordMsg="Empty category"
                                                     placeholder="Search category ..."
-                                                    className="mr-3"
-                                                    displayValue="name"
-                                                    id="css_custom"
-                                                    style={{
-                                                        chips: {
-                                                            background: 'green',
-                                                        },
-                                                        multiselectContainer: {
-                                                            color: 'green',
-                                                        },
-                                                        searchWrapper: {
-                                                            color: '#8898aa',
-                                                        },
-                                                        searchBox: {
-                                                            boxShadow:
-                                                                '0 1px 3px rgb(50 50 93 / 15%), 0 1px 0 rgb(0 0 0 / 2%)',
-                                                            transition: 'box-shadow 0.15s ease',
-                                                            borderRadius: '4px',
-                                                            border: 0,
-                                                            minHeight: '43px',
-                                                        },
-                                                        optionContainer: {
-                                                            boxShadow:
-                                                                '0 1px 3px rgb(50 50 93 / 15%), 0 1px 0 rgb(0 0 0 / 2%)',
-                                                            transition: 'box-shadow 0.15s ease',
-                                                            borderRadius: '4px',
-                                                            border: 0,
-                                                        },
-                                                    }}
+                                                    emptyRecordMsg="Empty category"
                                                 />
                                             </div>
                                         </FormGroup>
@@ -210,9 +164,9 @@ function CreateBrand() {
                                         />
                                         <FormGroup>
                                             <label className="form-control-label">Logo</label>
-                                            {pathLogo ? (
+                                            {brandObj.pathLogo ? (
                                                 <img
-                                                    src={pathLogo}
+                                                    src={brandObj.pathLogo}
                                                     alt="images"
                                                     className="rounded shadow"
                                                     onClick={() => inputFileLogo.current.click()}
@@ -247,9 +201,9 @@ function CreateBrand() {
                                         />
                                         <FormGroup>
                                             <label className="form-control-label">Image</label>
-                                            {pathImage ? (
+                                            {brandObj.pathImage ? (
                                                 <img
-                                                    src={pathImage}
+                                                    src={brandObj.pathImage}
                                                     alt="images"
                                                     className="rounded shadow"
                                                     onClick={() => inputFileImage.current.click()}
@@ -279,7 +233,7 @@ function CreateBrand() {
                                     <Col style={{ flex: 1 }}>
                                         <FormGroup>
                                             <label className="form-control-label">Descriptions</label>
-                                            <RichText onBlur={handleOnBlur} />
+                                            <RichText onChange={handleOnChangeContext} />
                                         </FormGroup>
                                     </Col>
                                 </Row>

@@ -2,17 +2,23 @@ import { useRef } from 'react';
 import SunEditor from 'suneditor-react';
 import 'suneditor/dist/css/suneditor.min.css';
 
-function RichText({ defaultContent, onSave = function () {}, onChange=function () {}, onBlur=function () {} }) {
+function RichText({ defaultContent, onSave, onChange, onBlur }) {
     const editor = useRef();
 
     const handleOnSave = () => {
-        onSave(editor);
+        if (onSave) {
+            onSave(editor);
+        }
     };
     const handleOnChange = () => {
-        onChange(editor);
+        if (onChange) {
+            onChange(editor);
+        }
     };
     const handleOnBlur = () => {
-        onBlur(editor);
+        if (onBlur) {
+            onBlur(editor);
+        }
     };
 
     return (

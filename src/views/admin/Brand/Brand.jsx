@@ -136,16 +136,13 @@ const Brand = () => {
                                         <th scope="col" style={{ width: '10%' }}>
                                             name
                                         </th>
-                                        <th scope="col" style={{ width: '20%' }}>
-                                            description
-                                        </th>
                                         <th scope="col" style={{ width: '5%' }}>
                                             total product
                                         </th>
-                                        <th scope="col" style={{ width: '25%' }}>
+                                        <th scope="col" style={{ width: '35%' }}>
                                             logo
                                         </th>
-                                        <th scope="col" style={{ width: '25%' }}>
+                                        <th scope="col" style={{ width: '35%' }}>
                                             image
                                         </th>
                                         <th scope="col" style={{ width: '5%' }}>
@@ -160,7 +157,6 @@ const Brand = () => {
                                         <tr key={index} data-id={item.id} className="h-auto">
                                             <td>{limit * (currentPage - 1) + index + 1}</td>
                                             <td>{item.name}</td>
-                                            <td>{item.description}</td>
                                             <td>{item.totalProduct}</td>
                                             <td>
                                                 <img
