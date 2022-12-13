@@ -32,36 +32,36 @@ function EditBrand() {
         status: 1,
     });
     const inputFileLogo = useRef();
-    const inputFileImage = useRef()
+    const inputFileImage = useRef();
 
     const inputLogoOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
-            setBrandObj({ ...brandObj, pathLogo: URL.createObjectURL(file) })
+            setBrandObj({ ...brandObj, pathLogo: URL.createObjectURL(file) });
         }
     };
 
     const inputImageOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
-            setBrandObj({ ...brandObj, pathImage: URL.createObjectURL(file) })
+            setBrandObj({ ...brandObj, pathImage: URL.createObjectURL(file) });
         }
     };
 
     const handleOnSelect = (selectedList, currentSelect) => {
-        setBrandObj({ ...brandObj, categories: [...brandObj.categories, currentSelect.id] })
-    }
+        setBrandObj({ ...brandObj, categories: [...brandObj.categories, currentSelect.id] });
+    };
 
     const handleOnRemove = (selectedList, currentSelect) => {
-        setBrandObj({ ...brandObj, categories: brandObj.categories.filter(e => e !== currentSelect.id) })
-    }
+        setBrandObj({ ...brandObj, categories: brandObj.categories.filter((e) => e !== currentSelect.id) });
+    };
 
     const handleOnChangeContext = (editor) => {
-        setBrandObj(prevObj => ({
+        setBrandObj((prevObj) => ({
             ...prevObj,
-            description: editor.current.getCharCount() ? editor.current.getContents() : ''
-        }))
-    }
+            description: editor.current.getCharCount() ? editor.current.getContents() : '',
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -120,13 +120,14 @@ function EditBrand() {
         };
 
         const getBannerById = async () => {
-            setLoading(true)
-            const res = await brandService.getBannerById(id)
-            setLoading(false)
+            setLoading(true);
+            const res = await brandService.getBannerById(id);
+            setLoading(false);
             if (res.status === 200) {
-                let { id, name, description, image, logo, status } = res.data
+                let { id, name, description, image, logo, categories, status } = res.data;
+                const arrCate = categories.reduce((accumulator, currentValue) => [...accumulator, currentValue.id], []);
 
-                setBrandObj(prevObj => ({
+                setBrandObj((prevObj) => ({
                     ...brandObj,
                     id,
                     name,
@@ -134,15 +135,16 @@ function EditBrand() {
                     pathLogo: logo.path,
                     image: image.id,
                     pathImage: image.path,
-                    categoriesDisplay: [{ id: 1, name: 'Category 00' }],
+                    categories: arrCate,
+                    categoriesDisplay: categories,
                     description,
-                    status: status.id
-                }))
+                    status: status.id,
+                }));
             }
-        }
+        };
         getCategoriesApi();
         if (+id) {
-            getBannerById()
+            getBannerById();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -153,7 +155,7 @@ function EditBrand() {
                 <div className="col">
                     <Card className="shadow">
                         <CardHeader className="border-0 d-flex align-items-center justify-content-between">
-                            <h3 className="mb-0">Create Brand</h3>
+                            <h3 className="mb-0">Edit Brand</h3>
                         </CardHeader>
                         <CardBody className="pt-0 pt-md-4">
                             <Form onSubmit={(e) => handleSubmit(e)}>
@@ -269,7 +271,10 @@ function EditBrand() {
                                     <Col style={{ flex: 1 }}>
                                         <FormGroup>
                                             <label className="form-control-label">Descriptions</label>
-                                            <RichText defaultContent={brandObj.description} onChange={handleOnChangeContext} />
+                                            <RichText
+                                                defaultContent={brandObj.description}
+                                                onChange={handleOnChangeContext}
+                                            />
                                         </FormGroup>
                                     </Col>
                                 </Row>

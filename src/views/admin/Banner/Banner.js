@@ -42,14 +42,30 @@ const Banner = () => {
     limit,
     fields: 'id,title,type'
   }
-  const getBannersApi = async () => {
-    const body = {
-      type: typeBanner,
-      title: keySearch
-    }
 
+  const getBody = () => {
+    switch (true) {
+      case Boolean(typeBanner) && Boolean(keySearch):
+        return {
+          type: typeBanner,
+          title: keySearch
+        }
+      case !Boolean(typeBanner) && Boolean(keySearch):
+        return {
+          title: keySearch
+        }
+      case Boolean(typeBanner) && !Boolean(keySearch):
+        return {
+          type: typeBanner,
+        }
+      default:
+        return {}
+    }
+  }
+
+  const getBannersApi = async () => {
     setLoading(true)
-    const res = await bannerService.getAll(body, params);
+    const res = await bannerService.getAll(getBody(), params);
     setLoading(false)
     if (res.status === 200) {
       setCurrentPage(params.page)

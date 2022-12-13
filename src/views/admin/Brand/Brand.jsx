@@ -84,7 +84,7 @@ const Brand = () => {
         setLoading(true);
         const res = await brandService.remove(id);
         if (res.status === 200) {
-            toast.success('Delete Successfully!');
+            toast.success('Save Successfully!');
             getBrandsApi();
         } else {
             toast.error(res.errors.message);
@@ -208,7 +208,7 @@ const Brand = () => {
                                                         </Link>
 
                                                         <DropdownItem onClick={(e) => handleInActive(e, item.id)}>
-                                                            InActive
+                                                            {item.status.name === 'Active' ? 'InActive' : 'Active'}
                                                         </DropdownItem>
                                                     </DropdownMenu>
                                                 </UncontrolledDropdown>
