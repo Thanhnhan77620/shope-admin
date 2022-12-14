@@ -57,7 +57,7 @@ function EditBanner() {
             setLoading(true);
             const resUploadFile = await fileService.upload(formData);
             if (resUploadFile.status === 201) {
-                bannerObj.logo = resUploadFile.data.id;
+                bannerObj.photo = resUploadFile.data.id;
                 updateBanner(bannerObj);
             } else {
                 alert(resUploadFile);
