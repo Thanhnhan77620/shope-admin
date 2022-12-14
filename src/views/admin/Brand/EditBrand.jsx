@@ -30,6 +30,7 @@ function EditBrand() {
         categoriesDisplay: [],
         description: '',
         status: 1,
+        statusName: '',
     });
     const inputFileLogo = useRef();
     const inputFileImage = useRef();
@@ -106,6 +107,44 @@ function EditBrand() {
         }
     };
 
+    const handleInActive = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        const res = await brandService.remove(id);
+        setLoading(false);
+        if (res.status === 200) {
+            toast.success('Save Successfully!');
+            getBannerById();
+        } else {
+            toast.error(res.errors.message);
+        }
+
+    };
+
+    const getBannerById = async () => {
+        setLoading(true);
+        const res = await brandService.getBannerById(id);
+        setLoading(false);
+        if (res.status === 200) {
+            let { id, name, description, image, logo, categories, status } = res.data;
+            const arrCate = categories.reduce((accumulator, currentValue) => [...accumulator, currentValue.id], []);
+
+            setBrandObj((prevObj) => ({
+                ...brandObj,
+                id,
+                name,
+                logo: logo.id,
+                pathLogo: logo.path,
+                image: image.id,
+                pathImage: image.path,
+                categories: arrCate,
+                categoriesDisplay: categories,
+                description,
+                status: status.id,
+                statusName: status.name
+            }));
+        }
+    };
     useEffect(() => {
         // fetch API
         const getCategoriesApi = async () => {
@@ -119,29 +158,6 @@ function EditBrand() {
             }
         };
 
-        const getBannerById = async () => {
-            setLoading(true);
-            const res = await brandService.getBannerById(id);
-            setLoading(false);
-            if (res.status === 200) {
-                let { id, name, description, image, logo, categories, status } = res.data;
-                const arrCate = categories.reduce((accumulator, currentValue) => [...accumulator, currentValue.id], []);
-
-                setBrandObj((prevObj) => ({
-                    ...brandObj,
-                    id,
-                    name,
-                    logo: logo.id,
-                    pathLogo: logo.path,
-                    image: image.id,
-                    pathImage: image.path,
-                    categories: arrCate,
-                    categoriesDisplay: categories,
-                    description,
-                    status: status.id,
-                }));
-            }
-        };
         getCategoriesApi();
         if (+id) {
             getBannerById();
@@ -158,7 +174,7 @@ function EditBrand() {
                             <h3 className="mb-0">Edit Brand</h3>
                         </CardHeader>
                         <CardBody className="pt-0 pt-md-4">
-                            <Form onSubmit={(e) => handleSubmit(e)}>
+                            <Form>
                                 <Row>
                                     <Col style={{ flex: 1 }}>
                                         <FormGroup>
@@ -285,15 +301,21 @@ function EditBrand() {
                                             <div className="d-flex">
                                                 <Button
                                                     className="btn btn-icon btn-success"
-                                                    disabled={loading}
-                                                    type="submit"
                                                     style={{ minWidth: '100px' }}
+                                                    onClick={handleSubmit}
                                                 >
                                                     <span className="btn-inner--text">Save</span>
                                                 </Button>
+                                                <Button
+                                                    className="btn btn-icon btn-danger"
+                                                    style={{ minWidth: '100px' }}
+                                                    onClick={handleInActive}
+                                                >
+                                                    <span className="btn-inner--text"> {brandObj.statusName === 'Active' ? 'InActive' : 'Active'}</span>
+                                                </Button>
                                                 <Link
                                                     to="/admin/brands"
-                                                    className=" btn btn-icon btn-danger"
+                                                    className=" btn btn-icon btn-info"
                                                     type="button"
                                                     style={{ minWidth: '100px' }}
                                                 >

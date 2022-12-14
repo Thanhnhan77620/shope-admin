@@ -131,7 +131,6 @@ function CreateBanner() {
                                             <div className="d-flex">
                                                 <Button
                                                     className="btn btn-icon btn-success"
-                                                    disabled={loading}
                                                     type="submit"
                                                     style={{ minWidth: '100px' }}
                                                 >

@@ -6,10 +6,6 @@ import {
     Card,
     CardHeader,
     CardBody,
-    DropdownMenu,
-    DropdownItem,
-    UncontrolledDropdown,
-    DropdownToggle,
     Container,
     Row,
     FormGroup,
@@ -23,6 +19,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import * as categoryService from '~/services/categoryService';
 import * as fileService from '~/services/fileService';
 import ModalPopup from '~/components/ModalPopup';
+import { MenuItem } from 'react-pro-sidebar';
 
 function EditCategory() {
     const [loading, setLoading] = useState(false);
@@ -34,6 +31,7 @@ function EditCategory() {
         logo: '',
         path: '',
         status: 1,
+        statusName: '',
     });
 
     const isNullObj = Object.values(cateObj).some((value) => value === null || value === undefined || value === '');
@@ -81,19 +79,34 @@ function EditCategory() {
         }
     };
 
+    const handleInActive = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        const res = await categoryService.remove(id);
+        setLoading(false);
+        if (res.status === 200) {
+            toast.success('Save Successfully!');
+            getCateById();
+        } else {
+            toast.error(res.errors.message);
+        }
+
+    };
+
+    // fetch API
+    const getCateById = async () => {
+        setLoading(true);
+        const res = await categoryService.getCategoryById(id);
+        setLoading(false);
+        if (res.status === 200) {
+            let { id, name, logo, status } = res.data;
+            setCateObj({ id, name, logo: logo.id, path: logo.path, status: status.id, statusName: status.name });
+        } else {
+            toast.error(res.errors.message);
+        }
+    };
     useEffect(() => {
-        // fetch API
-        const getCateById = async () => {
-            setLoading(true);
-            const res = await categoryService.getCategoryById(id);
-            setLoading(false);
-            if (res.status === 200) {
-                let { id, name, logo, status } = res.data;
-                setCateObj({ id, name, logo: logo.id, path: logo.path, status: status.id });
-            } else {
-                toast.error(res.errors.message);
-            }
-        };
+
         if (+id) {
             getCateById();
         }
@@ -108,7 +121,7 @@ function EditCategory() {
                             <h3 className="mb-0">Edit Category</h3>
                         </CardHeader>
                         <CardBody className="pt-0 pt-md-4">
-                            <Form onSubmit={(e) => handleSubmit(e)}>
+                            <Form>
                                 <Row>
                                     <Col style={{ flex: 1 }}>
                                         <FormGroup>
@@ -126,15 +139,23 @@ function EditCategory() {
                                             <div className="d-flex">
                                                 <Button
                                                     className="btn btn-icon btn-success"
-                                                    disabled={loading}
-                                                    type="submit"
+
                                                     style={{ minWidth: '100px' }}
+                                                    onClick={handleSubmit}
                                                 >
                                                     <span className="btn-inner--text">Save</span>
                                                 </Button>
+                                                <Button
+                                                    className="btn btn-icon btn-danger"
+
+                                                    style={{ minWidth: '100px' }}
+                                                    onClick={handleInActive}
+                                                >
+                                                    <span className="btn-inner--text">{cateObj.statusName === 'Active' ? 'InActive' : 'Active'}</span>
+                                                </Button>
                                                 <Link
                                                     to="/admin/categories"
-                                                    className=" btn btn-icon btn-danger"
+                                                    className=" btn btn-icon btn-info"
                                                     type="button"
                                                     style={{ minWidth: '100px' }}
                                                 >

@@ -18,59 +18,38 @@ import {
     Row,
 } from 'reactstrap';
 import { useEffect, useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 
+//custom component
 import ModalPopup from '~/components/ModalPopup';
 
-import * as categoryService from '~/services/categoryService';
+//services
+import * as productService from '~/services/productService'
 
-const Brand = () => {
+
+function Product() {
     const limit = 5;
-
     const [loading, setLoading] = useState(false);
-    const [categories, setCategories] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
+    // const [currentPage, setCurrentPage] = useState(1);
     const [totalPage, setTotalPage] = useState(0);
-    const [keySearch, setKeySearch] = useState('');
-
-    // params
-    let params = {
-        page: currentPage,
+    const [products, setProducts] = useState([]);
+    const [params, setParams] = useState({
+        page: 1,
         limit,
-        fields: 'id,name',
-    };
-
-    const handleEnterSearch = (e) => {
-        if (e.key === 'Enter') {
-            setKeySearch(e.target.value);
-        }
-    };
-
-    const getCategoriesApi = async () => {
-        const body = keySearch ? { name: keySearch } : {};
-
-        setLoading(true);
-        const res = await categoryService.getAll(body, params);
-        setLoading(false);
-        if (res.status === 200) {
-            setCurrentPage(params.page);
-            setTotalPage(res.data.totalPages);
-            setCategories(res.data.data);
-        } else {
-            toast.error(res.errors.message);
-        }
-    };
+        fields: 'id,name,likedCount,stock,price,sold',
+    });
 
     const renderPaging = (totalPage) => {
         const listPaging = [];
         for (let i = 1; i <= totalPage; i++) {
             listPaging.push(
-                <PaginationItem key={i} className={currentPage === i ? 'active' : ''}>
+                <PaginationItem key={i} className={params.page === i ? 'active' : ''}>
                     <PaginationLink
                         onClick={(e) => {
-                            params.page = +e.target.innerText;
-                            getCategoriesApi();
+                            // setParams(prevSate => ({ ...params, page: +e.target.innerText }))
+                            // params.page = +e.target.innerText;
+                            // getProductsApi();
                         }}
                     >
                         {i}
@@ -84,20 +63,34 @@ const Brand = () => {
     const handleInActive = async (e, id) => {
         e.preventDefault();
         setLoading(true);
-        const res = await categoryService.remove(id);
+        const res = await productService.remove(id);
         if (res.status === 200) {
-            toast.success('Delete Successfully!');
-            getCategoriesApi();
+            toast.success('Save Successfully!');
+            getProductsApi();
         } else {
             toast.error(res.errors.message);
         }
         setLoading(false);
     };
 
+    //fetch API
+    const getProductsApi = async () => {
+        setLoading(true);
+        const res = await productService.getAll({}, params);
+        setLoading(false);
+        if (res.status === 200) {
+            // setCurrentPage(params.page);
+            // setParams(prevPagrams=>({...params,currentPage:}))
+            setTotalPage(res.data.totalPages);
+            setProducts(res.data.data);
+        } else {
+            toast.error(res.errors.message);
+        }
+    };
+
     useEffect(() => {
-        getCategoriesApi();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPage, keySearch]);
+        getProductsApi()
+    }, [params]);
 
     return (
         <>
@@ -108,16 +101,33 @@ const Brand = () => {
                     <div className="col">
                         <Card className="shadow">
                             <CardHeader className="border-0 d-flex align-items-center justify-content-between">
-                                <h3 className="mb-0">Categories</h3>
+                                <h3 className="mb-0">Products</h3>
                                 <div className="d-flex justify-content-between w-50">
+                                    {/* Dropdown */}
+                                    {/* <UncontrolledDropdown>
+                                        <DropdownToggle caret color="primary" className="mr-3">
+                                            {keyBanner[typeBanner]}
+                                        </DropdownToggle>
+                                        <DropdownMenu>
+                                            {keyBanner.map((item, index) => (
+                                                <DropdownItem
+                                                    key={index}
+                                                    onClick={() => setTypeBanner(+BannerType[item])}
+                                                >
+                                                    {item}
+                                                </DropdownItem>
+                                            ))}
+                                        </DropdownMenu>
+                                    </UncontrolledDropdown> */}
+
                                     <Input
                                         className="mr-3"
                                         placeholder="Search"
                                         type="text"
-                                        onKeyDown={handleEnterSearch}
+                                    // onKeyDown={handleEnterSearch}
                                     />
                                     <Link
-                                        to="/admin/category/create"
+                                        to="/admin/banner/create"
                                         className=" btn btn-icon btn-success d-flex"
                                         type="button"
                                     >
@@ -132,38 +142,40 @@ const Brand = () => {
                             <Table className="align-items-center table-flush" responsive>
                                 <thead className="thead-light text-center">
                                     <tr>
-                                        <th scope="col" style={{ width: '5%' }}>
+                                        <th scope="col" style={{ width: '%' }}>
                                             no.
                                         </th>
-                                        <th scope="col" style={{ width: '10%' }}>
+                                        <th scope="col" style={{ width: '%' }}>
                                             name
                                         </th>
-                                        <th scope="col" style={{ width: '70%' }}>
-                                            logo
+                                        <th scope="col" style={{ width: '%' }}>
+                                            price
                                         </th>
-                                        <th scope="col" style={{ width: '10%' }}>
+                                        <th scope="col" style={{ width: '%' }}>
+                                            likedCount
+                                        </th>
+                                        <th scope="col" style={{ width: '%' }}>
+                                            stock
+                                        </th>
+                                        <th scope="col" style={{ width: '%' }}>
+                                            sold
+                                        </th>
+                                        <th scope="col" style={{ width: '%' }}>
                                             status
                                         </th>
-                                        <th scope="col" style={{ width: '5%' }} />
+                                        <th scope="col" style={{ width: '%' }} />
                                     </tr>
                                 </thead>
 
                                 <tbody className="text-center">
-                                    {categories.map((item, index) => (
+                                    {products.map((item, index) => (
                                         <tr key={index} data-id={item.id} className="h-auto">
-                                            <td>{limit * (currentPage - 1) + index + 1}</td>
+                                            <td>{limit * (params.page - 1) + index + 1}</td>
                                             <td>{item.name}</td>
-                                            <td>
-                                                <img
-                                                    src={item.logo.path}
-                                                    alt="images"
-                                                    className="rounded shadow"
-                                                    style={{
-                                                        height: '400px',
-                                                        width: '100%',
-                                                    }}
-                                                ></img>
-                                            </td>
+                                            <td>{item.price}</td>
+                                            <td>{item.likedCount}</td>
+                                            <td>{item.stock}</td>
+                                            <td>{item.sold}</td>
                                             <td>
                                                 <Badge color="" className="badge-dot mr-4">
                                                     {item.status.name === 'Active' ? (
@@ -187,11 +199,16 @@ const Brand = () => {
                                                         <i className="fas fa-ellipsis-v" />
                                                     </DropdownToggle>
                                                     <DropdownMenu className="dropdown-menu-arrow" right>
-                                                        <Link to={`/admin/category/edit/${item.id}`}>
+                                                        <Link to={`/admin/product/edit/${item.id}`}>
                                                             <DropdownItem>Edit</DropdownItem>
                                                         </Link>
 
-                                                        <DropdownItem onClick={(e) => handleInActive(e, item.id)}>
+                                                        <DropdownItem
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                handleInActive(item.id);
+                                                            }}
+                                                        >
                                                             {item.status.name === 'Active' ? 'InActive' : 'Active'}
                                                         </DropdownItem>
                                                     </DropdownMenu>
@@ -208,9 +225,9 @@ const Brand = () => {
                                         className="pagination justify-content-end mb-0"
                                         listClassName="justify-content-end mb-0"
                                     >
-                                        <PaginationItem className={currentPage === 1 ? 'disabled' : ''}>
+                                        <PaginationItem className={params.page === 1 ? 'disabled' : ''}>
                                             <PaginationLink
-                                                onClick={() => setCurrentPage((prevSate) => prevSate - 1)}
+                                                onClick={() => setParams(prevSate => ({ ...params, currentPage: prevSate.page - 1 }))}//setCurrentPage((prevSate) => prevSate - 1)
                                                 tabIndex="-1"
                                             >
                                                 <i className="fas fa-angle-left" />
@@ -220,8 +237,8 @@ const Brand = () => {
                                         {/* render paging */}
                                         {renderPaging(totalPage)}
 
-                                        <PaginationItem className={currentPage === totalPage ? 'disabled' : ''}>
-                                            <PaginationLink onClick={() => setCurrentPage((prevSate) => prevSate + 1)}>
+                                        <PaginationItem className={params.page === totalPage ? 'disabled' : ''}>
+                                            <PaginationLink onClick={() => setParams(prevSate => ({ ...params, currentPage: prevSate.page + 1 }))}>
                                                 <i className="fas fa-angle-right" />
                                                 <span className="sr-only">Next</span>
                                             </PaginationLink>
@@ -236,7 +253,7 @@ const Brand = () => {
             <ToastContainer />
             <ModalPopup hidden={!loading} />
         </>
-    );
-};
+    )
+}
 
-export default Brand;
+export default Product
