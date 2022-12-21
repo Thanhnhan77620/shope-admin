@@ -1,7 +1,7 @@
 import * as httpRequest from '~/utils/httpRequest';
 const token = JSON.parse(localStorage.getItem('token')) || null;
 
-export const getAll = async (body = {}, params = {}) => {
+export const getAllPaging = async (body = {}, params = {}) => {
     const configHeader = {
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -10,6 +10,17 @@ export const getAll = async (body = {}, params = {}) => {
         params
     }
     const res = await httpRequest.post('brands/paging', body, configHeader);
+    return res;
+};
+
+export const getAll = async () => {
+    const configHeader = {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    }
+    const res = await httpRequest.get('brands', configHeader);
     return res;
 };
 

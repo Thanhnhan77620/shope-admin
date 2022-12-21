@@ -17,10 +17,13 @@ import {
     UncontrolledDropdown,
     DropdownToggle,
     Textarea,
-    Collapse
+    Collapse,
+    Alert,
+    ButtonGroup,
 } from 'reactstrap';
+import ImageUploading from 'react-images-uploading';
 import { ToastContainer, toast } from 'react-toastify';
-import ReactDOM from "react-dom/client";
+import ReactDOM from 'react-dom/client';
 
 // client components
 import { BannerType } from '~/common/bannerTypeEnum';
@@ -32,338 +35,307 @@ import { MultiSelectDropdown } from '~/components/MultiSelectDropdown';
 import * as brandService from '~/services/brandService';
 import * as categoryService from '~/services/categoryService';
 import * as fileService from '~/services/fileService';
-
+import ImageUploader from '~/components/ImageUploader';
 
 function CreateProduct() {
     const [loading, setLoading] = useState(false);
+    const [brands, setBrands] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [add, setAdd] = useState(false);
+    const [description, setDescription] = useState('');
+    const [productImagePath, setProductImagePath] = useState('');
     const [brandObj, setBrandObj] = useState({
         name: '',
-        logo: '',
-        pathLogo: '',
-        image: '',
-        pathImage: '',
-        categories: [],
         description: '',
+        cate: '',
+        image: '',
+        images: [],
+        discount: 0,
+        priceBeforeDiscount: 0,
+        stock: 0,
+        brand: '',
+        categories: '',
         status: 1,
     });
+    const [productObj, setProductObj] = useState({
+        name: '',
+        description: '',
+        image: '',
+        images: [],
+        discount: 0,
+        priceBeforeDiscount: 0,
+        stock: 0,
+        brand: 0,
+        categories: 0,
+        keywords: [],
+        status: 1,
+    });
+
     const inputFileLogo = useRef();
     const inputFileImage = useRef();
 
+    const inputProductImage = useRef();
+    const inputProductName = useRef();
+    const inputProductDiscount = useRef();
+    const inputProductStock = useRef();
+    const inputProductKeyword = useRef();
 
-    const keyBanners = Object.keys(BannerType);
-    keyBanners.shift();
+    const input = useRef();
 
     const inputLogoOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
-            setBrandObj({ ...brandObj, pathLogo: URL.createObjectURL(file) })
+            setBrandObj({ ...brandObj, pathLogo: URL.createObjectURL(file) });
         }
     };
 
     const inputImageOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
-            setBrandObj({ ...brandObj, pathImage: URL.createObjectURL(file) })
+            setBrandObj({ ...brandObj, pathImage: URL.createObjectURL(file) });
         }
     };
 
-    const handleOnSelect = (selectedList, currentSelect) => {
-        setBrandObj({ ...brandObj, categories: [...brandObj.categories, currentSelect.id] })
-    }
+    const inputProductImageOnchange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+            // setBrandObj({ ...brandObj, pathImage: URL.createObjectURL(file) });
+            setProductImagePath(URL.createObjectURL(file));
+        }
+    };
 
-    const handleOnRemove = (selectedList, currentSelect) => {
-        setBrandObj({ ...brandObj, categories: brandObj.categories.filter(e => e !== currentSelect.id) })
-    }
+    const handleOnSelectBrand = (selectedList, currentSelect) => {
+        setProductObj({ ...productObj, brand: currentSelect.id });
+        getBrandById(currentSelect.id);
+    };
 
+    const handleOnRemoveBrand = (selectedList, currentSelect) => {
+        setProductObj({ ...productObj, brand: 0, categories: 0 });
+        setCategories([]);
+    };
+
+    const handleOnSelectCate = (selectedList, currentSelect) => {
+        setProductObj({ ...productObj, categories: currentSelect.id });
+    };
+
+    const handleOnRemoveCate = (selectedList, currentSelect) => {
+        setProductObj({ ...productObj, categories: 0 });
+    };
 
     const handleOnChangeContext = (editor) => {
-        setBrandObj(prevObj => ({
+        setProductObj((prevObj) => ({
             ...prevObj,
-            description: editor.current.getCharCount() ? editor.current.getContents() : ''
-        }))
-    }
+            description: editor.current.getCharCount() ? editor.current.getContents() : '',
+        }));
+    };
+
+    const getValuesModel = (parentId, containerId) => {
+        const parentElContainer = document.getElementById(parentId);
+        const parentEl = parentElContainer.querySelectorAll(`#${containerId}`);
+        const tierModel = {
+            tierModel: parentElContainer.querySelector('input[name=name-type-model]').value,
+            models: [],
+        };
+        parentEl[0].childNodes.forEach((el) => {
+            const model = {
+                name: el.querySelector('input[name=name]').value,
+                priceBeforeDiscount: +el.querySelector('input[name=price]').value,
+                stock: +el.querySelector('input[name=stock]').value,
+                file: el.querySelector('input[name=image]').files[0],
+                image: '',
+            };
+            tierModel.models.push(model);
+        });
+        return tierModel;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const fileLogo = inputFileLogo && inputFileLogo.current.files[0];
-        const fileImage = inputFileImage && inputFileImage.current.files[0];
+        const content = inputProductKeyword.current.value;
+        const keyWords = [];
+        content.split(',').forEach((item) => {
+            if (item.trim()) {
+                keyWords.push(item.trim());
+            }
+        });
 
-        if (fileLogo && fileImage && brandObj.name) {
-            var formDataLogo = new FormData();
-            formDataLogo.append('file', fileLogo);
+        setProductObj({
+            ...productObj,
+            name: inputProductName.current.value,
+            discount: +inputProductDiscount.current.value,
+            stock: +inputProductStock.current.value,
+            keywords: keyWords,
+            tierModels: [getValuesModel('tierModel', 'tierModel-child-container')],
+        });
 
-            var formDataImage = new FormData();
-            formDataImage.append('file', fileImage);
+        // const fileLogo = inputFileLogo && inputFileLogo.current.files[0];
+        // const fileImage = inputFileImage && inputFileImage.current.files[0];
 
+        // if (fileLogo && fileImage && brandObj.name) {
+        //     var formDataLogo = new FormData();
+        //     formDataLogo.append('file', fileLogo);
 
-            const resUploadFileLogo = fileService.upload(formDataLogo);
-            const resUploadFileImage = fileService.upload(formDataImage);
-            setLoading(true);
-            Promise.all([resUploadFileLogo, resUploadFileImage])
-                .then(async (values) => {
-                    brandObj.logo = values[0].data.id;
-                    brandObj.image = values[1].data.id;
-                    console.log(brandObj);
-                    const reqBanner = await brandService.create(brandObj);
-                    setLoading(false);
-                    if (reqBanner.status === 201) {
-                        toast.success('Save Successfully!');
-                    } else {
-                        toast.error(reqBanner.errors.message);
-                    }
-                })
-                .catch((error) => toast.error(error));
-        }
+        //     var formDataImage = new FormData();
+        //     formDataImage.append('file', fileImage);
+
+        //     const resUploadFileLogo = fileService.upload(formDataLogo);
+        //     const resUploadFileImage = fileService.upload(formDataImage);
+        //     setLoading(true);
+        //     Promise.all([resUploadFileLogo, resUploadFileImage])
+        //         .then(async (values) => {
+        //             brandObj.logo = values[0].data.id;
+        //             brandObj.image = values[1].data.id;
+        //             console.log(brandObj);
+        //             const reqBanner = await brandService.create(brandObj);
+        //             setLoading(false);
+        //             if (reqBanner.status === 201) {
+        //                 toast.success('Save Successfully!');
+        //             } else {
+        //                 toast.error(reqBanner.errors.message);
+        //             }
+        //         })
+        //         .catch((error) => toast.error(error));
+        // }
     };
 
     const handleAddModelUI = () => {
-        const parentNode = document.getElementById('tierModel-child-comtainer')
-        const length = parentNode.childNodes.length
-        const dataId = length ? +parentNode.lastChild.getAttribute('data-id') + 1 : 1
-        const modelId = `tierModel-child-comtainer${dataId}`;
-        const chilMode = document.createElement("div");
-        chilMode.setAttribute("id", modelId);
-        chilMode.setAttribute("data-id", dataId);
-        parentNode.appendChild(chilMode)
+        const parentNode = document.getElementById('tierModel-child-container');
+        const length = parentNode.childNodes.length;
+        const dataId = length ? +parentNode.lastChild.getAttribute('data-id') + 1 : 1;
+        const modelId = `tierModel-child-item-${dataId}`;
+        const childMode = document.createElement('div');
+        childMode.setAttribute('id', modelId);
+        childMode.setAttribute('data-id', dataId);
+        parentNode.appendChild(childMode);
         const root = ReactDOM.createRoot(document.getElementById(modelId));
         root.render(
             <React.StrictMode>
-                <Card className="shadow mx-4 mb-2">
-                    <Row className='pt-3 px-2'>
+                <Card className="shadow mx-5 mb-2">
+                    <Row className="pt-3 px-2 d-flex flex-column" id="example-collapse-text">
                         <Col>
                             <Row>
                                 <Col style={{ flex: 1 }}>
-                                    <FormGroup>
-                                        <label className="form-control-label">Name</label>
+                                    <FormGroup className="mb-2">
+                                        <label className="form-control-label mb-1">Name</label>
                                         <Input
                                             type="text"
-                                            name="number"
+                                            name="name"
                                             className="form-control-alternative"
-                                            placeholder="Ex: 10%"
+                                            placeholder="Ex: XXL"
+                                        />
+                                    </FormGroup>
+                                    <FormGroup className="mb-2">
+                                        <label className="form-control-label mb-1">Price</label>
+                                        <Input
+                                            type="number"
+                                            pattern="[0,9].*"
+                                            name="price"
+                                            className="form-control-alternative"
+                                            placeholder="Ex: 100000"
                                         />
                                     </FormGroup>
                                 </Col>
-                            </Row>
-
-                            <Row>
                                 <Col style={{ flex: 1 }}>
-                                    <Row>
-                                        <Col style={{ flex: 1 }}>
-                                            <FormGroup>
-                                                <label className="form-control-label">Price</label>
-                                                <Input
-                                                    type="text"
-                                                    name="number"
-                                                    className="form-control-alternative"
-                                                    placeholder="Ex: 10%"
-                                                />
-                                            </FormGroup>
-                                        </Col>
-                                    </Row>
-
-                                    <Row>
-                                        <Col style={{ flex: 1 }}>
-                                            <FormGroup>
-                                                <label className="form-control-label">Stock</label>
-                                                <Input
-                                                    type="text"
-                                                    name="number"
-                                                    className="form-control-alternative"
-                                                    placeholder="Ex: 10%"
-                                                />
-                                            </FormGroup>
-                                        </Col>
-                                    </Row>
-
-                                    <Row>
-                                        <Col style={{ flex: 1 }}>
-                                            <FormGroup>
-                                                <label className="form-control-label">Parent</label>
-                                                <Input
-                                                    type="text"
-                                                    name="number"
-                                                    className="form-control-alternative"
-                                                    placeholder="Ex: 10%"
-                                                />
-                                            </FormGroup>
-                                        </Col>
-                                    </Row>
+                                    <FormGroup className="mb-2">
+                                        <label className="form-control-label mb-1">Stock</label>
+                                        <Input
+                                            type="number"
+                                            pattern="[0,9].*"
+                                            name="stock"
+                                            className="form-control-alternative"
+                                            placeholder="Ex: 100"
+                                        />
+                                    </FormGroup>
                                 </Col>
 
-                                <Col style={{ flex: 2, flexShrink: 0 }}>
+                                <Col style={{ flex: 1, flexShrink: 0 }}>
                                     <input
-                                        ref={inputFileLogo}
-                                        onChange={inputLogoOnchange}
                                         type="file"
                                         accept=".jpg,.jpeg,.png"
-                                        name="picture"
+                                        name="image"
                                         hidden
+                                        onChange={(e) => readURL(e.target, modelId, 'image-review')} //'tierModel-child-item-1', 'image-review'
                                     />
-                                    <FormGroup>
-                                        <label className="form-control-label">Image</label>
-                                        {brandObj.pathLogo ? (
-                                            <img
-                                                src={brandObj.pathLogo}
-                                                alt="images"
-                                                className="rounded shadow"
-                                                onClick={() => inputFileLogo.current.click()}
-                                                style={{
-                                                    height: '350px',
-                                                    width: '100%',
-                                                    cursor: 'pointer',
-                                                }}
-                                            ></img>
-                                        ) : (
-                                            <div
-                                                className="rounded shadow"
-                                                style={{
-                                                    backgroundRepeat: 'no-repeat',
-                                                    paddingTop: '80%',
-                                                    backgroundSize: 'contain',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={() => inputFileLogo.current.click()}
-                                            ></div>
-                                        )}
+                                    <FormGroup className="mb-2">
+                                        <label className="form-control-label mb-1">Image</label>
+                                        <div
+                                            id="image-review"
+                                            className="rounded shadow"
+                                            style={{
+                                                backgroundRepeat: 'no-repeat',
+                                                paddingTop: '80%',
+                                                backgroundSize: 'cover',
+                                                cursor: 'pointer',
+                                            }}
+                                            onClick={() => handleUploadImageModel(modelId)} //tierModel-child-item-1
+                                        ></div>
                                     </FormGroup>
                                 </Col>
                             </Row>
                         </Col>
-
-                        <Col>
-                            <Row>
-                                <Col style={{ flex: 1 }}>
-                                    <FormGroup>
-                                        <label className="form-control-label">Name</label>
-                                        <Input
-                                            type="text"
-                                            name="number"
-                                            className="form-control-alternative"
-                                            placeholder="Ex: 10%"
-                                        />
-                                    </FormGroup>
-                                </Col>
-                            </Row>
-
-                            <Row>
-                                <Col style={{ flex: 1 }}>
-                                    <Row>
-                                        <Col style={{ flex: 1 }}>
-                                            <FormGroup>
-                                                <label className="form-control-label">Price</label>
-                                                <Input
-                                                    type="text"
-                                                    name="number"
-                                                    className="form-control-alternative"
-                                                    placeholder="Ex: 10%"
-                                                />
-                                            </FormGroup>
-                                        </Col>
-                                    </Row>
-
-                                    <Row>
-                                        <Col style={{ flex: 1 }}>
-                                            <FormGroup>
-                                                <label className="form-control-label">Stock</label>
-                                                <Input
-                                                    type="text"
-                                                    name="number"
-                                                    className="form-control-alternative"
-                                                    placeholder="Ex: 10%"
-                                                />
-                                            </FormGroup>
-                                        </Col>
-                                    </Row>
-
-                                    <Row>
-                                        <Col style={{ flex: 1 }}>
-                                            <FormGroup>
-                                                <label className="form-control-label">Parent</label>
-                                                <Input
-                                                    type="text"
-                                                    name="number"
-                                                    className="form-control-alternative"
-                                                    placeholder="Ex: 10%"
-                                                />
-                                            </FormGroup>
-                                        </Col>
-                                    </Row>
-                                </Col>
-
-                                <Col style={{ flex: 2, flexShrink: 0 }}>
-                                    <input
-                                        ref={inputFileLogo}
-                                        onChange={inputLogoOnchange}
-                                        type="file"
-                                        accept=".jpg,.jpeg,.png"
-                                        name="picture"
-                                        hidden
-                                    />
-                                    <FormGroup>
-                                        <label className="form-control-label">Image</label>
-                                        {brandObj.pathLogo ? (
-                                            <img
-                                                src={brandObj.pathLogo}
-                                                alt="images"
-                                                className="rounded shadow"
-                                                onClick={() => inputFileLogo.current.click()}
-                                                style={{
-                                                    height: '350px',
-                                                    width: '100%',
-                                                    cursor: 'pointer',
-                                                }}
-                                            ></img>
-                                        ) : (
-                                            <div
-                                                className="rounded shadow"
-                                                style={{
-                                                    backgroundRepeat: 'no-repeat',
-                                                    paddingTop: '80%',
-                                                    backgroundSize: 'contain',
-                                                    cursor: 'pointer',
-                                                }}
-                                                onClick={() => inputFileLogo.current.click()}
-                                            ></div>
-                                        )}
-                                    </FormGroup>
-                                </Col>
-                            </Row>
-                        </Col>
-
                     </Row>
-                    <Button
-                        className="btn btn-icon btn-danger mx-0"
-                        style={{ minWidth: '100px' }}
-                        onClick={() => handleRemoveModelUI(modelId)}
-                    >
+                    <Button className="btn btn-icon btn-danger mx-0" onClick={() => handleRemoveModelUI(modelId)}>
                         <span className="btn-inner--text">Remove</span>
                     </Button>
                 </Card>
-            </React.StrictMode>
+            </React.StrictMode>,
         );
-    }
+    };
 
     const handleRemoveModelUI = (modelId) => {
-        document.getElementById(modelId).remove()
+        document.getElementById(modelId).remove();
+    };
+
+    const getBrandById = async (id) => {
+        const res = await brandService.getBannerById(id);
+        console.log(res);
+        if (res.status === 200) {
+            setCategories(res.data.categories);
+        } else {
+            toast.error(res.errors.message);
+        }
+    };
+
+    const [images, setImages] = useState([]);
+
+    const handleOnChange = (imageList) => {
+        setImages(imageList);
+    };
+    const handleOnError = () => {
+        setImages([]);
+    };
+
+    function readURL(input, modelId, fieldName) {
+        const model = document.getElementById(modelId);
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            console.log(model.querySelectorAll('#image-review')[0]);
+            reader.onload = function (e) {
+                // model.getElementsByTagName('img')[0].setAttribute('src', e.target.result);
+                model.querySelectorAll('#image-review')[0].style.backgroundImage = `url('${e.target.result}')`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
+    const handleUploadImageModel = (modelId) => {
+        const modelEl = document.getElementById(modelId);
+        const inputFile = modelEl.querySelector('input[type=file]');
+        inputFile.click();
+    };
 
     useEffect(() => {
-        const getCategoriesApi = async () => {
-            setLoading(true);
-            const res = await categoryService.getAll({}, { fields: 'id,name' });
-            setLoading(false);
+        const getBrandsApi = async () => {
+            const res = await brandService.getAll();
             if (res.status === 200) {
-                setCategories(res.data.data);
+                setBrands(res.data.data);
             } else {
                 toast.error(res.errors.message);
             }
         };
-
-        getCategoriesApi();
+        getBrandsApi();
     }, []);
+
+    console.log(productObj);
 
     return (
         <Container className="mt--7" fluid>
@@ -377,26 +349,27 @@ function CreateProduct() {
                             <Form onSubmit={(e) => handleSubmit(e)}>
                                 <Row>
                                     <Col style={{ flex: 1 }}>
-                                        <FormGroup>
-                                            <label className="form-control-label">Name</label>
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Name</label>
                                             <Input
+                                                innerRef={inputProductName}
                                                 className="form-control-alternative"
                                                 placeholder="Ex: Product"
                                                 type="text"
-                                                name="name"
-                                                onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                // name="name"
+                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
                                     <Col style={{ flex: 1 }}>
-                                        <FormGroup>
-                                            <label className="form-control-label">Brands</label>
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Brands</label>
                                             <div>
                                                 <MultiSelectDropdown
                                                     selectionLimit={1}
-                                                    onRemove={handleOnRemove}
-                                                    onSelect={handleOnSelect}
-                                                    options={categories}
+                                                    onRemove={handleOnRemoveBrand}
+                                                    onSelect={handleOnSelectBrand}
+                                                    options={brands}
                                                     placeholder="Search brand ..."
                                                     emptyRecordMsg="Empty brand"
                                                 />
@@ -404,13 +377,13 @@ function CreateProduct() {
                                         </FormGroup>
                                     </Col>
                                     <Col style={{ flex: 1 }}>
-                                        <FormGroup>
-                                            <label className="form-control-label">Categories</label>
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Categories</label>
                                             <div>
                                                 <MultiSelectDropdown
                                                     selectionLimit={1}
-                                                    onRemove={handleOnRemove}
-                                                    onSelect={handleOnSelect}
+                                                    onRemove={handleOnRemoveCate}
+                                                    onSelect={handleOnSelectCate}
                                                     options={categories}
                                                     placeholder="Search category ..."
                                                     emptyRecordMsg="Empty category"
@@ -422,39 +395,41 @@ function CreateProduct() {
 
                                 <Row>
                                     <Col style={{ flex: 1 }}>
-                                        <FormGroup>
-                                            <label className="form-control-label">Discount</label>
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Discount</label>
                                             <Input
-                                                type="text"
-                                                name="number"
+                                                innerRef={inputProductDiscount}
+                                                type="number"
+                                                pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 10%"
-                                                onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
                                     <Col style={{ flex: 1 }}>
-                                        <FormGroup>
-                                            <label className="form-control-label">Stock</label>
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Stock</label>
                                             <Input
-                                                type="text"
-                                                name="number"
+                                                innerRef={inputProductStock}
+                                                type="number"
+                                                pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 1000"
-                                                onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
                                     <Col style={{ flex: 2 }}>
-                                        <FormGroup>
-                                            <label className="form-control-label">Keyword for search</label>
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Keyword for search</label>
                                             <div>
                                                 <Input
+                                                    innerRef={inputProductKeyword}
                                                     type="textarea"
-                                                    name="keyworks"
                                                     className="form-control form-control-alternative"
                                                     placeholder="Ex: product01, product01"
-                                                    onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                    // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                                 />
                                             </div>
                                         </FormGroup>
@@ -464,23 +439,22 @@ function CreateProduct() {
                                 <Row>
                                     <Col style={{ flex: 1, flexShrink: 0 }}>
                                         <input
-                                            ref={inputFileLogo}
-                                            onChange={inputLogoOnchange}
+                                            ref={inputProductImage}
+                                            onChange={inputProductImageOnchange}
                                             type="file"
                                             accept=".jpg,.jpeg,.png"
-                                            name="picture"
                                             hidden
                                         />
-                                        <FormGroup>
-                                            <label className="form-control-label">Image</label>
-                                            {brandObj.pathLogo ? (
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Image</label>
+                                            {productImagePath ? (
                                                 <img
-                                                    src={brandObj.pathLogo}
+                                                    src={productImagePath}
                                                     alt="images"
                                                     className="rounded shadow"
-                                                    onClick={() => inputFileLogo.current.click()}
+                                                    onClick={() => inputProductImage.current.click()}
                                                     style={{
-                                                        height: '350px',
+                                                        height: '244px',
                                                         width: '100%',
                                                         cursor: 'pointer',
                                                     }}
@@ -494,298 +468,177 @@ function CreateProduct() {
                                                         backgroundSize: 'contain',
                                                         cursor: 'pointer',
                                                     }}
-                                                    onClick={() => inputFileLogo.current.click()}
+                                                    onClick={() => inputProductImage.current.click()}
                                                 ></div>
                                             )}
                                         </FormGroup>
                                     </Col>
+
                                     <Col style={{ flex: 2 }}>
-                                        <input
-                                            ref={inputFileImage}
-                                            onChange={inputImageOnchange}
-                                            type="file"
-                                            accept=".jpg,.jpeg,.png"
-                                            name="picture"
-                                            hidden
-                                        />
-                                        <FormGroup>
-                                            <label className="form-control-label">Thumbnails</label>
-                                            {brandObj.pathImage ? (
-                                                <img
-                                                    src={brandObj.pathImage}
-                                                    alt="images"
-                                                    className="rounded shadow"
-                                                    onClick={() => inputFileImage.current.click()}
-                                                    style={{
-                                                        height: '350px',
-                                                        width: '100%',
-                                                        cursor: 'pointer',
-                                                    }}
-                                                ></img>
-                                            ) : (
-                                                <div
-                                                    className="rounded shadow"
-                                                    style={{
-                                                        backgroundRepeat: 'no-repeat',
-                                                        paddingTop: '40%',
-                                                        backgroundSize: 'contain',
-                                                        cursor: 'pointer',
-                                                    }}
-                                                    onClick={() => inputFileImage.current.click()}
-                                                ></div>
-                                            )}
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Thumbnails</label>
+                                            <ImageUploader
+                                                images={images}
+                                                OnChange={handleOnChange}
+                                                OnError={handleOnError}
+                                            />
                                         </FormGroup>
                                     </Col>
                                 </Row>
 
-                                <div id='tierModel'>
+                                <div id="tierModel">
                                     <Row>
                                         <Col style={{ flex: 1 }}>
-                                            <FormGroup>
-                                                <label className="form-control-label">Model</label>
+                                            <FormGroup className="mb-2">
+                                                <label className="form-control-label mb-1">Name Type Model</label>
                                                 <Input
                                                     type="text"
-                                                    name="number"
                                                     className="form-control-alternative"
-                                                    placeholder="Ex: 10%"
+                                                    placeholder="Ex: Size"
+                                                    name="name-type-model"
                                                 />
                                             </FormGroup>
                                         </Col>
                                     </Row>
 
-                                    <div id='tierModel-child-comtainer'>
-                                        <div id='tierModel-child-item-1' data-id='1'>
-                                            <label className="form-control-label">Model1</label>
-                                            <Collapse isOpen={false} title="Tesst....." >
-                                                <Card className="shadow mx-4 mb-2">
-
-                                                    <Row className='pt-3 px-2'>
-                                                        <Col>
-                                                            <Row>
-                                                                <Col style={{ flex: 1 }}>
-                                                                    <FormGroup>
-                                                                        <label className="form-control-label">Name</label>
-                                                                        <Input
-                                                                            type="text"
-                                                                            name="number"
-                                                                            className="form-control-alternative"
-                                                                            placeholder="Ex: 10%"
-                                                                        />
-                                                                    </FormGroup>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col style={{ flex: 1 }}>
-                                                                    <Row>
-                                                                        <Col style={{ flex: 1 }}>
-                                                                            <FormGroup>
-                                                                                <label className="form-control-label">Price</label>
-                                                                                <Input
-                                                                                    type="text"
-                                                                                    name="number"
-                                                                                    className="form-control-alternative"
-                                                                                    placeholder="Ex: 10%"
-                                                                                />
-                                                                            </FormGroup>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row>
-                                                                        <Col style={{ flex: 1 }}>
-                                                                            <FormGroup>
-                                                                                <label className="form-control-label">Stock</label>
-                                                                                <Input
-                                                                                    type="text"
-                                                                                    name="number"
-                                                                                    className="form-control-alternative"
-                                                                                    placeholder="Ex: 10%"
-                                                                                />
-                                                                            </FormGroup>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row>
-                                                                        <Col style={{ flex: 1 }}>
-                                                                            <FormGroup>
-                                                                                <label className="form-control-label">Parent</label>
-                                                                                <Input
-                                                                                    type="text"
-                                                                                    name="number"
-                                                                                    className="form-control-alternative"
-                                                                                    placeholder="Ex: 10%"
-                                                                                />
-                                                                            </FormGroup>
-                                                                        </Col>
-                                                                    </Row>
-                                                                </Col>
-
-                                                                <Col style={{ flex: 2, flexShrink: 0 }}>
-                                                                    <input
-                                                                        ref={inputFileLogo}
-                                                                        onChange={inputLogoOnchange}
-                                                                        type="file"
-                                                                        accept=".jpg,.jpeg,.png"
-                                                                        name="picture"
-                                                                        hidden
+                                    <label className="form-control-label mb-1 mx-5">Models</label>
+                                    <div id="tierModel-child-container">
+                                        <div id="tierModel-child-item-1" data-id="1">
+                                            <Card className="shadow mx-5 mb-2">
+                                                <Row
+                                                    className="pt-3 px-2 d-flex flex-column"
+                                                    id="example-collapse-text"
+                                                >
+                                                    <Col>
+                                                        <Row>
+                                                            <Col style={{ flex: 1 }}>
+                                                                <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Name
+                                                                    </label>
+                                                                    <Input
+                                                                        type="text"
+                                                                        name="name"
+                                                                        className="form-control-alternative"
+                                                                        placeholder="Ex: XXL"
                                                                     />
-                                                                    <FormGroup>
-                                                                        <label className="form-control-label">Image</label>
-                                                                        {brandObj.pathLogo ? (
-                                                                            <img
-                                                                                src={brandObj.pathLogo}
-                                                                                alt="images"
-                                                                                className="rounded shadow"
-                                                                                onClick={() => inputFileLogo.current.click()}
-                                                                                style={{
-                                                                                    height: '350px',
-                                                                                    width: '100%',
-                                                                                    cursor: 'pointer',
-                                                                                }}
-                                                                            ></img>
-                                                                        ) : (
-                                                                            <div
-                                                                                className="rounded shadow"
-                                                                                style={{
-                                                                                    backgroundRepeat: 'no-repeat',
-                                                                                    paddingTop: '80%',
-                                                                                    backgroundSize: 'contain',
-                                                                                    cursor: 'pointer',
-                                                                                }}
-                                                                                onClick={() => inputFileLogo.current.click()}
-                                                                            ></div>
-                                                                        )}
-                                                                    </FormGroup>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
-
-                                                        <Col>
-                                                            <Row>
-                                                                <Col style={{ flex: 1 }}>
-                                                                    <FormGroup>
-                                                                        <label className="form-control-label">Name</label>
-                                                                        <Input
-                                                                            type="text"
-                                                                            name="number"
-                                                                            className="form-control-alternative"
-                                                                            placeholder="Ex: 10%"
-                                                                        />
-                                                                    </FormGroup>
-                                                                </Col>
-                                                            </Row>
-
-                                                            <Row>
-                                                                <Col style={{ flex: 1 }}>
-                                                                    <Row>
-                                                                        <Col style={{ flex: 1 }}>
-                                                                            <FormGroup>
-                                                                                <label className="form-control-label">Price</label>
-                                                                                <Input
-                                                                                    type="text"
-                                                                                    name="number"
-                                                                                    className="form-control-alternative"
-                                                                                    placeholder="Ex: 10%"
-                                                                                />
-                                                                            </FormGroup>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row>
-                                                                        <Col style={{ flex: 1 }}>
-                                                                            <FormGroup>
-                                                                                <label className="form-control-label">Stock</label>
-                                                                                <Input
-                                                                                    type="text"
-                                                                                    name="number"
-                                                                                    className="form-control-alternative"
-                                                                                    placeholder="Ex: 10%"
-                                                                                />
-                                                                            </FormGroup>
-                                                                        </Col>
-                                                                    </Row>
-
-                                                                    <Row>
-                                                                        <Col style={{ flex: 1 }}>
-                                                                            <FormGroup>
-                                                                                <label className="form-control-label">Parent</label>
-                                                                                <Input
-                                                                                    type="text"
-                                                                                    name="number"
-                                                                                    className="form-control-alternative"
-                                                                                    placeholder="Ex: 10%"
-                                                                                />
-                                                                            </FormGroup>
-                                                                        </Col>
-                                                                    </Row>
-                                                                </Col>
-
-                                                                <Col style={{ flex: 2, flexShrink: 0 }}>
-                                                                    <input
-                                                                        ref={inputFileLogo}
-                                                                        onChange={inputLogoOnchange}
-                                                                        type="file"
-                                                                        accept=".jpg,.jpeg,.png"
-                                                                        name="picture"
-                                                                        hidden
+                                                                </FormGroup>
+                                                                <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Price
+                                                                    </label>
+                                                                    <Input
+                                                                        type="number"
+                                                                        pattern="[0,9].*"
+                                                                        name="price"
+                                                                        className="form-control-alternative"
+                                                                        placeholder="Ex: 100000"
                                                                     />
-                                                                    <FormGroup>
-                                                                        <label className="form-control-label">Image</label>
-                                                                        {brandObj.pathLogo ? (
-                                                                            <img
-                                                                                src={brandObj.pathLogo}
-                                                                                alt="images"
-                                                                                className="rounded shadow"
-                                                                                onClick={() => inputFileLogo.current.click()}
-                                                                                style={{
-                                                                                    height: '350px',
-                                                                                    width: '100%',
-                                                                                    cursor: 'pointer',
-                                                                                }}
-                                                                            ></img>
-                                                                        ) : (
-                                                                            <div
-                                                                                className="rounded shadow"
-                                                                                style={{
-                                                                                    backgroundRepeat: 'no-repeat',
-                                                                                    paddingTop: '80%',
-                                                                                    backgroundSize: 'contain',
-                                                                                    cursor: 'pointer',
-                                                                                }}
-                                                                                onClick={() => inputFileLogo.current.click()}
-                                                                            ></div>
-                                                                        )}
-                                                                    </FormGroup>
-                                                                </Col>
-                                                            </Row>
-                                                        </Col>
+                                                                </FormGroup>
+                                                            </Col>
+                                                            <Col style={{ flex: 1 }}>
+                                                                <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Stock
+                                                                    </label>
+                                                                    <Input
+                                                                        type="number"
+                                                                        pattern="[0,9].*"
+                                                                        name="stock"
+                                                                        className="form-control-alternative"
+                                                                        placeholder="Ex: 100"
+                                                                    />
+                                                                </FormGroup>
 
-                                                    </Row>
+                                                                {/* <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Parent
+                                                                    </label>
+                                                                    <Input
+                                                                        type="text"
+                                                                        name="parent"
+                                                                        className="form-control-alternative"
+                                                                        placeholder="Ex: 10%"
+                                                                    />
+                                                                </FormGroup> */}
+                                                            </Col>
 
-                                                </Card>
-                                            </Collapse>
+                                                            <Col style={{ flex: 1, flexShrink: 0 }}>
+                                                                <input
+                                                                    type="file"
+                                                                    accept=".jpg,.jpeg,.png"
+                                                                    name="image"
+                                                                    hidden
+                                                                    onChange={(e) =>
+                                                                        readURL(
+                                                                            e.target,
+                                                                            'tierModel-child-item-1',
+                                                                            'image-review',
+                                                                        )
+                                                                    }
+                                                                />
+                                                                <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Image
+                                                                    </label>
+                                                                    <div
+                                                                        id="image-review"
+                                                                        className="rounded shadow"
+                                                                        style={{
+                                                                            backgroundRepeat: 'no-repeat',
+                                                                            paddingTop: '80%',
+                                                                            backgroundSize: 'cover',
+                                                                            cursor: 'pointer',
+                                                                        }}
+                                                                        onClick={() =>
+                                                                            handleUploadImageModel(
+                                                                                'tierModel-child-item-1',
+                                                                            )
+                                                                        }
+                                                                    ></div>
+
+                                                                    {/* <img
+                                                                        id="image-review"
+                                                                        src="#"
+                                                                        alt="images"
+                                                                        className="rounded shadow"
+                                                                        style={{
+                                                                            minHeight: '180px',
+                                                                            minWidth: '100%',
+                                                                            height: '180px',
+                                                                            width: '100%',
+                                                                            cursor: 'pointer',
+                                                                        }}
+                                                                        onClick={() =>
+                                                                            handleUploadImageModel(
+                                                                                'tierModel-child-item-1',
+                                                                            )
+                                                                        }
+                                                                    ></img> */}
+                                                                </FormGroup>
+                                                            </Col>
+                                                        </Row>
+                                                    </Col>
+                                                </Row>
+                                            </Card>
                                         </div>
                                     </div>
-
-
                                 </div>
 
-                                <div id='tierModelChild'></div>
+                                <div id="tierModelChild"></div>
 
                                 <Button
                                     className="btn btn-icon btn-success"
                                     style={{ minWidth: '100px' }}
                                     onClick={handleAddModelUI}
                                 >
-                                    <span className="btn-inner--text">Add</span>
+                                    <span className="btn-inner--text">Add Model</span>
                                 </Button>
-
-
 
                                 <Row>
                                     <Col style={{ flex: 1 }}>
-                                        <FormGroup>
-                                            <label className="form-control-label">Descriptions</label>
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Descriptions</label>
                                             <RichText onChange={handleOnChangeContext} />
                                         </FormGroup>
                                     </Col>
@@ -793,11 +646,10 @@ function CreateProduct() {
 
                                 <Row>
                                     <Col>
-                                        <FormGroup>
+                                        <FormGroup className="mb-2">
                                             <div className="d-flex">
                                                 <Button
                                                     className="btn btn-icon btn-success"
-
                                                     type="submit"
                                                     style={{ minWidth: '100px' }}
                                                 >
@@ -823,7 +675,7 @@ function CreateProduct() {
 
             <ToastContainer />
             <ModalPopup hidden={!loading} />
-        </Container >
+        </Container>
     );
 }
 

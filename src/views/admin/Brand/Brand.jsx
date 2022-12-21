@@ -49,7 +49,7 @@ const Brand = () => {
         const body = keySearch ? { name: keySearch } : {};
 
         setLoading(true);
-        const res = await brandService.getAll(body, params);
+        const res = await brandService.getAllPaging(body, params);
         setLoading(false);
         if (res.status === 200) {
             setCurrentPage(params.page);
