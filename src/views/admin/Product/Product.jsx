@@ -26,19 +26,29 @@ import ModalPopup from '~/components/ModalPopup';
 
 //services
 import * as productService from '~/services/productService'
+import { useRef } from 'react';
 
 
 function Product() {
     const limit = 5;
+
     const [loading, setLoading] = useState(false);
-    // const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
     const [totalPage, setTotalPage] = useState(0);
     const [products, setProducts] = useState([]);
+    const [keySearch, setKeySearch] = useState('');
     const [params, setParams] = useState({
         page: 1,
         limit,
         fields: 'id,name,likedCount,stock,price,sold',
     });
+    const inputSearch = useRef(null)
+
+    // let params = {
+    //     page: 1,
+    //     limit,
+    //     fields: 'id,name,likedCount,stock,price,sold',
+    // }
 
     const renderPaging = (totalPage) => {
         const listPaging = [];
@@ -47,7 +57,7 @@ function Product() {
                 <PaginationItem key={i} className={params.page === i ? 'active' : ''}>
                     <PaginationLink
                         onClick={(e) => {
-                            // setParams(prevSate => ({ ...params, page: +e.target.innerText }))
+                            setParams(prevSate => ({ ...params, page: +e.target.innerText }))
                             // params.page = +e.target.innerText;
                             // getProductsApi();
                         }}
@@ -73,6 +83,13 @@ function Product() {
         setLoading(false);
     };
 
+    const handleEnterSearch = (e) => {
+        if (e.key === 'Enter') {
+            setKeySearch(inputSearch.current.value)
+        }
+
+    }
+
     //fetch API
     const getProductsApi = async () => {
         setLoading(true);
@@ -80,7 +97,7 @@ function Product() {
         setLoading(false);
         if (res.status === 200) {
             // setCurrentPage(params.page);
-            // setParams(prevPagrams=>({...params,currentPage:}))
+            // setParams(prevPagrams => ({ ...params, page:}))
             setTotalPage(res.data.totalPages);
             setProducts(res.data.data);
         } else {
@@ -88,9 +105,36 @@ function Product() {
         }
     };
 
+    const searching = async () => {
+        const body = { keyword: keySearch };
+        setLoading(true);
+        const res = await productService.searChing(body, params);
+        setLoading(false);
+        if (res.status === 200) {
+            // setCurrentPage(params.page);
+            // setParams(prevPagrams => ({ ...params, page:}))
+            setTotalPage(res.data.totalPages);
+            setProducts(res.data.data);
+        } else {
+            toast.error(res.errors.message);
+        }
+    };
+
+    // useEffect(() => {
+
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, []);
+
     useEffect(() => {
-        getProductsApi()
-    }, [params]);
+        if (keySearch) {
+            searching()
+        } else {
+            getProductsApi()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [keySearch, params]);
+
+
 
     return (
         <>
@@ -121,13 +165,14 @@ function Product() {
                                     </UncontrolledDropdown> */}
 
                                     <Input
+                                        innerRef={inputSearch}
                                         className="mr-3"
                                         placeholder="Search"
                                         type="text"
-                                    // onKeyDown={handleEnterSearch}
+                                        onKeyDown={handleEnterSearch}
                                     />
                                     <Link
-                                        to="/admin/banner/create"
+                                        to="/admin/product/create"
                                         className=" btn btn-icon btn-success d-flex"
                                         type="button"
                                     >
@@ -177,14 +222,14 @@ function Product() {
                                             <td>{item.stock}</td>
                                             <td>{item.sold}</td>
                                             <td>
-                                                <Badge color="" className="badge-dot mr-4">
+                                                {/* <Badge color="" className="badge-dot mr-4">
                                                     {item.status.name === 'Active' ? (
                                                         <i className="bg-success" />
                                                     ) : (
                                                         <i className="bg-warning" />
                                                     )}
                                                     {item.status.name}
-                                                </Badge>
+                                                </Badge> */}
                                             </td>
                                             <td className="text-right">
                                                 <UncontrolledDropdown>
@@ -209,7 +254,7 @@ function Product() {
                                                                 handleInActive(item.id);
                                                             }}
                                                         >
-                                                            {item.status.name === 'Active' ? 'InActive' : 'Active'}
+                                                            {/* {item.status.name === 'Active' ? 'InActive' : 'Active'} */}
                                                         </DropdownItem>
                                                     </DropdownMenu>
                                                 </UncontrolledDropdown>
@@ -227,18 +272,19 @@ function Product() {
                                     >
                                         <PaginationItem className={params.page === 1 ? 'disabled' : ''}>
                                             <PaginationLink
-                                                onClick={() => setParams(prevSate => ({ ...params, currentPage: prevSate.page - 1 }))}//setCurrentPage((prevSate) => prevSate - 1)
+                                                onClick={() => setParams(prevSate => ({ ...params, page: prevSate.page - 1 }))}
                                                 tabIndex="-1"
                                             >
                                                 <i className="fas fa-angle-left" />
                                                 <span className="sr-only">Previous</span>
                                             </PaginationLink>
                                         </PaginationItem>
+
                                         {/* render paging */}
                                         {renderPaging(totalPage)}
 
                                         <PaginationItem className={params.page === totalPage ? 'disabled' : ''}>
-                                            <PaginationLink onClick={() => setParams(prevSate => ({ ...params, currentPage: prevSate.page + 1 }))}>
+                                            <PaginationLink onClick={() => setParams(prevSate => ({ ...params, page: prevSate.page + 1 }))}>
                                                 <i className="fas fa-angle-right" />
                                                 <span className="sr-only">Next</span>
                                             </PaginationLink>

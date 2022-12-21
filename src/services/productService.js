@@ -56,3 +56,15 @@ export const update = async (body = {}) => {
     const res = await httpRequest.patch('products/' + body.id, body, configHeader);
     return res;
 };
+
+export const searChing = async (body = {}, params = {}) => {
+    const configHeader = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        params,
+    };
+    const res = await httpRequest.post('products/searching', body, configHeader);
+    return res;
+};

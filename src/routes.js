@@ -100,14 +100,14 @@ var routes = [
     },
 
     // product
-    // {
-    //     path: '/products',
-    //     name: 'Products',
-    //     icon: 'ni ni-bullet-list-67 text-red',
-    //     component: Product,
-    //     layout: '/admin',
-    //     sideBar: true,
-    // },
+    {
+        path: '/products',
+        name: 'Products',
+        icon: 'ni ni-bullet-list-67 text-red',
+        component: Product,
+        layout: '/admin',
+        sideBar: true,
+    },
     {
         path: '/product/create',
         name: 'Create Product',

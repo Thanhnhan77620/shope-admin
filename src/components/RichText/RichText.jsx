@@ -39,7 +39,7 @@ function RichText({ defaultContent, onSave, onChange, onBlur }) {
                         ['fullScreen', 'showBlocks', 'codeView'],
                     ],
                 }}
-                setDefaultStyle="font-size: 20px;text-align:left;height:50vh"
+                setDefaultStyle="font-size: 20px;text-align:left;height:30vh"
                 setContents={defaultContent}
                 getSunEditorInstance={(sunEditor) => (editor.current = sunEditor)}
                 onSave={handleOnSave}
