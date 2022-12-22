@@ -79,6 +79,7 @@ function CreateProduct() {
     const inputProductName = useRef();
     const inputProductDiscount = useRef();
     const inputProductStock = useRef();
+    const inputProductPrice = useRef();
     const inputProductKeyword = useRef();
 
     const parentId = 'tierModel';
@@ -172,10 +173,12 @@ function CreateProduct() {
             ...productObj,
             name: inputProductName.current.value,
             discount: +inputProductDiscount.current.value,
+            priceBeforeDiscount: +inputProductPrice.current.value,
             stock: +inputProductStock.current.value,
             keywords: keyWords,
             tierModels: [],
         };
+        console.log(body);
         const tierModel = getValuesModel(parentId, tierModelChildContainerId);
         body.tierModels.push(tierModel);
 
@@ -419,6 +422,19 @@ function CreateProduct() {
                                 </Row>
 
                                 <Row>
+                                    <Col style={{ flex: 1 }}>
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Price</label>
+                                            <Input
+                                                innerRef={inputProductPrice}
+                                                type="number"
+                                                pattern="[0,9].*"
+                                                className="form-control-alternative"
+                                                placeholder="Ex: 100000"
+                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                            />
+                                        </FormGroup>
+                                    </Col>
                                     <Col style={{ flex: 1 }}>
                                         <FormGroup className="mb-2">
                                             <label className="form-control-label mb-1">Discount</label>
