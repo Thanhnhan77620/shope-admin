@@ -36,6 +36,7 @@ import * as brandService from '~/services/brandService';
 import * as categoryService from '~/services/categoryService';
 import * as fileService from '~/services/fileService';
 import ImageUploader from '~/components/ImageUploader';
+import { wait } from '@testing-library/user-event/dist/utils';
 
 function CreateProduct() {
     const [loading, setLoading] = useState(false);
@@ -43,6 +44,7 @@ function CreateProduct() {
     const [categories, setCategories] = useState([]);
     const [description, setDescription] = useState('');
     const [productImagePath, setProductImagePath] = useState('');
+    const [images, setImages] = useState([]);
     const [brandObj, setBrandObj] = useState({
         name: '',
         description: '',
@@ -73,11 +75,17 @@ function CreateProduct() {
     const inputFileLogo = useRef();
     const inputFileImage = useRef();
 
+
     const inputProductImage = useRef();
     const inputProductName = useRef();
     const inputProductDiscount = useRef();
     const inputProductStock = useRef();
     const inputProductKeyword = useRef();
+
+    const parentId = 'tierModel'
+    const tierModelChildContainerId = 'tierModel-child-container'
+    const tierModelChildItemIdPattern = 'tierModel-child-item-'
+
 
     const input = useRef();
 
@@ -157,15 +165,39 @@ function CreateProduct() {
                 keyWords.push(item.trim());
             }
         });
-
-        setProductObj({
+        // setProductObj({
+        //     ...productObj,
+        //     name: inputProductName.current.value,
+        //     discount: +inputProductDiscount.current.value,
+        //     stock: +inputProductStock.current.value,
+        //     keywords: keyWords,
+        //     tierModels: [getValuesModel(parentId, tierModelChildContainerId)],
+        // });
+        const body = {
             ...productObj,
             name: inputProductName.current.value,
             discount: +inputProductDiscount.current.value,
             stock: +inputProductStock.current.value,
             keywords: keyWords,
-            tierModels: [getValuesModel('tierModel', 'tierModel-child-container')],
-        });
+            tierModels: [getValuesModel(parentId, tierModelChildContainerId)],
+        }
+
+        const arrApi = []
+        //upload image product
+        var formData1 = new FormData();
+        formData1.append('file', inputProductImage.current.files[0]);
+        arrApi.push(fileService.upload(formData1))
+
+        //upload ithumbs product
+        const arrayData = []
+        images.forEach(item => {
+            arrayData.push(item.file)
+        })
+        var formData2 = new FormData();
+        formData2.append('files', arrayData);
+        arrApi.push(fileService.uploadMultilFile(formData2))
+
+        Promise.all(arrApi).then(res => console.log(res))
 
         // const fileLogo = inputFileLogo && inputFileLogo.current.files[0];
         // const fileImage = inputFileImage && inputFileImage.current.files[0];
@@ -197,11 +229,11 @@ function CreateProduct() {
         // }
     };
 
-    const handleAddModelUI = () => {
-        const parentNode = document.getElementById('tierModel-child-container');
+    const handleAddModelUI = (tierModelChildContainerId, tierModelChildItemIdPattern) => {
+        const parentNode = document.getElementById(tierModelChildContainerId);
         const length = parentNode.childNodes.length;
         const dataId = length ? +parentNode.lastChild.getAttribute('data-id') + 1 : 1;
-        const modelId = `tierModel-child-item-${dataId}`;
+        const modelId = `${tierModelChildItemIdPattern}${dataId}`;
         const childMode = document.createElement('div');
         childMode.setAttribute('id', modelId);
         childMode.setAttribute('data-id', dataId);
@@ -287,7 +319,6 @@ function CreateProduct() {
 
     const getBrandById = async (id) => {
         const res = await brandService.getBannerById(id);
-        console.log(res);
         if (res.status === 200) {
             setCategories(res.data.categories);
         } else {
@@ -295,7 +326,7 @@ function CreateProduct() {
         }
     };
 
-    const [images, setImages] = useState([]);
+
 
     const handleOnChange = (imageList) => {
         setImages(imageList);
@@ -335,8 +366,6 @@ function CreateProduct() {
         getBrandsApi();
     }, []);
 
-    console.log(productObj);
-
     return (
         <Container className="mt--7" fluid>
             <Row>
@@ -356,8 +385,8 @@ function CreateProduct() {
                                                 className="form-control-alternative"
                                                 placeholder="Ex: Product"
                                                 type="text"
-                                                // name="name"
-                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                            // name="name"
+                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -403,7 +432,7 @@ function CreateProduct() {
                                                 pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 10%"
-                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -416,7 +445,7 @@ function CreateProduct() {
                                                 pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 1000"
-                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -429,7 +458,7 @@ function CreateProduct() {
                                                     type="textarea"
                                                     className="form-control form-control-alternative"
                                                     placeholder="Ex: product01, product01"
-                                                    // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                                 />
                                             </div>
                                         </FormGroup>
@@ -502,8 +531,8 @@ function CreateProduct() {
                                     </Row>
 
                                     <label className="form-control-label mb-1 mx-5">Models</label>
-                                    <div id="tierModel-child-container">
-                                        <div id="tierModel-child-item-1" data-id="1">
+                                    <div id={tierModelChildContainerId}>
+                                        <div id={`${tierModelChildItemIdPattern}1`} data-id="1">
                                             <Card className="shadow mx-5 mb-2">
                                                 <Row
                                                     className="pt-3 px-2 d-flex flex-column"
@@ -620,6 +649,9 @@ function CreateProduct() {
                                                         </Row>
                                                     </Col>
                                                 </Row>
+                                                {/* <Button className="btn btn-icon btn-danger mx-0" onClick={() => handleRemoveModelUI(`${tierModelChildItemIdPattern}1`)}>
+                                                    <span className="btn-inner--text">Remove</span>
+                                                </Button> */}
                                             </Card>
                                         </div>
                                     </div>
@@ -630,7 +662,7 @@ function CreateProduct() {
                                 <Button
                                     className="btn btn-icon btn-success"
                                     style={{ minWidth: '100px' }}
-                                    onClick={handleAddModelUI}
+                                    onClick={() => handleAddModelUI(tierModelChildContainerId, tierModelChildItemIdPattern)}
                                 >
                                     <span className="btn-inner--text">Add Model</span>
                                 </Button>

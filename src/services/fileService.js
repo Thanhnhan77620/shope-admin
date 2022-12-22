@@ -5,9 +5,20 @@ export const upload = async (data) => {
     const configHeader = {
         headers: {
             'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}`
-        }
-    }
+            Authorization: `Bearer ${token}`,
+        },
+    };
     const res = await httpRequest.post('files/upload', data, configHeader);
+    return res;
+};
+
+export const uploadMultilFile = async (data) => {
+    const configHeader = {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+        },
+    };
+    const res = await httpRequest.post('files/uploads', data, configHeader);
     return res;
 };
