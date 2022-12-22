@@ -176,11 +176,21 @@ function CreateProduct() {
             priceBeforeDiscount: +inputProductPrice.current.value,
             stock: +inputProductStock.current.value,
             keywords: keyWords,
-            tierModels: [],
+            tierModels: [getValuesModel(parentId, tierModelChildContainerId)],
         };
-        console.log(body);
-        const tierModel = getValuesModel(parentId, tierModelChildContainerId);
-        body.tierModels.push(tierModel);
+        // setProductObj((prev) => {
+        //     const tierModel = getValuesModel(parentId, tierModelChildContainerId);
+        //     return {
+        //         ...prev,
+        //         name: inputProductName.current.value,
+        //         discount: +inputProductDiscount.current.value,
+        //         priceBeforeDiscount: +inputProductPrice.current.value,
+        //         stock: +inputProductStock.current.value,
+        //         keywords: keyWords,
+        //         tierModels: prev.tierModels.push(tierModel),
+        //     };
+        // });
+        // console.log(body);
 
         const arrApi = [];
         // upload image product
@@ -200,21 +210,23 @@ function CreateProduct() {
         body.tierModels[0].models.forEach((item) => {
             formData3.append('files', item.file);
         });
-        arrApi.push(fileService.uploadMultiFile(formData2));
+        arrApi.push(fileService.uploadMultiFile(formData3));
 
-        Promise.all(arrApi).then(async (res) => {
+        Promise.all(arrApi).then((res) => {
+            console.log(res);
             body.image = res[0].data.id;
             res[1].data.forEach((item) => body.images.push(item.id));
             res[2].data.forEach((item, index) => {
                 body.tierModels[0].models[index].image = item.id;
             });
 
-            const req = await productService.create(body);
-            if (req.status === 201) {
-                toast.success('Save Successfully!');
-            } else {
-                toast.error(req.errors.message);
-            }
+            Promise.resolve(productService.create(body)).then((req) => {
+                if (req.status === 201) {
+                    toast.success('Save Successfully!');
+                } else {
+                    toast.error(req.errors.message);
+                }
+            });
         });
     };
 
