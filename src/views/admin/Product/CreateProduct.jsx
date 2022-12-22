@@ -158,7 +158,7 @@ function CreateProduct() {
         return tierModel;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         const content = inputProductKeyword.current.value;
         const keyWords = [];
@@ -167,22 +167,17 @@ function CreateProduct() {
                 keyWords.push(item.trim());
             }
         });
-        // setProductObj({
-        //     ...productObj,
-        //     name: inputProductName.current.value,
-        //     discount: +inputProductDiscount.current.value,
-        //     stock: +inputProductStock.current.value,
-        //     keywords: keyWords,
-        //     tierModels: [getValuesModel(parentId, tierModelChildContainerId)],
-        // });
+
         let body = {
             ...productObj,
             name: inputProductName.current.value,
             discount: +inputProductDiscount.current.value,
             stock: +inputProductStock.current.value,
             keywords: keyWords,
-            tierModels: [getValuesModel(parentId, tierModelChildContainerId)],
+            tierModels: [],
         };
+        const tierModel = getValuesModel(parentId, tierModelChildContainerId);
+        body.tierModels.push(tierModel);
 
         const arrApi = [];
         // upload image product
@@ -205,19 +200,13 @@ function CreateProduct() {
         arrApi.push(fileService.uploadMultiFile(formData2));
 
         Promise.all(arrApi).then(async (res) => {
-            console.log(res);
-
             body.image = res[0].data.id;
-
             res[1].data.forEach((item) => body.images.push(item.id));
-            console.log(body.tierModels[0].models);
             res[2].data.forEach((item, index) => {
-                console.log(body.tierModels[0].models[index]);
                 body.tierModels[0].models[index].image = item.id;
             });
 
             const req = await productService.create(body);
-            console.log(req);
             if (req.status === 201) {
                 toast.success('Save Successfully!');
             } else {
@@ -347,7 +336,6 @@ function CreateProduct() {
         const model = document.getElementById(modelId);
         if (input.files && input.files[0]) {
             var reader = new FileReader();
-            console.log(model.querySelectorAll('#image-review')[0]);
             reader.onload = function (e) {
                 // model.getElementsByTagName('img')[0].setAttribute('src', e.target.result);
                 model.querySelectorAll('#image-review')[0].style.backgroundImage = `url('${e.target.result}')`;
