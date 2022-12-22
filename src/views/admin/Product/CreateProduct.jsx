@@ -30,13 +30,13 @@ import { BannerType } from '~/common/bannerTypeEnum';
 import ModalPopup from '~/components/ModalPopup';
 import { RichText } from '~/components/RichText';
 import { MultiSelectDropdown } from '~/components/MultiSelectDropdown';
+import ImageUploader from '~/components/ImageUploader';
 
 //services
 import * as brandService from '~/services/brandService';
 import * as categoryService from '~/services/categoryService';
 import * as fileService from '~/services/fileService';
-import ImageUploader from '~/components/ImageUploader';
-import { wait } from '@testing-library/user-event/dist/utils';
+import * as productService from '~/services/productService';
 
 function CreateProduct() {
     const [loading, setLoading] = useState(false);
@@ -75,21 +75,19 @@ function CreateProduct() {
     const inputFileLogo = useRef();
     const inputFileImage = useRef();
 
-
     const inputProductImage = useRef();
     const inputProductName = useRef();
     const inputProductDiscount = useRef();
     const inputProductStock = useRef();
     const inputProductKeyword = useRef();
 
-    const parentId = 'tierModel'
-    const tierModelChildContainerId = 'tierModel-child-container'
-    const tierModelChildItemIdPattern = 'tierModel-child-item-'
+    const parentId = 'tierModel';
+    const tierModelChildContainerId = 'tierModel-child-container';
+    const tierModelChildItemIdPattern = 'tierModel-child-item-';
 
-    const parentId2 = 'tierModelChild'
-    const tierModelChildContainerId2 = 'tierModelChild-child-container'
-    const tierModelChildItemIdPattern2 = 'tierModelChild-child-item-'
-
+    const parentId2 = 'tierModelChild';
+    const tierModelChildContainerId2 = 'tierModelChild-child-container';
+    const tierModelChildItemIdPattern2 = 'tierModelChild-child-item-';
 
     const input = useRef();
 
@@ -177,73 +175,55 @@ function CreateProduct() {
         //     keywords: keyWords,
         //     tierModels: [getValuesModel(parentId, tierModelChildContainerId)],
         // });
-        const body = {
+        let body = {
             ...productObj,
             name: inputProductName.current.value,
             discount: +inputProductDiscount.current.value,
             stock: +inputProductStock.current.value,
             keywords: keyWords,
             tierModels: [getValuesModel(parentId, tierModelChildContainerId)],
-        }
+        };
 
-        const arrApi = []
-        //upload image product
-        // var formData1 = new FormData();
-        // formData1.append('file', inputProductImage.current.files[0]);
-        // arrApi.push(fileService.upload(formData1))
+        const arrApi = [];
+        // upload image product
+        var formData1 = new FormData();
+        formData1.append('file', inputProductImage.current.files[0]);
+        arrApi.push(fileService.upload(formData1));
 
-        console.log(inputProductImage.current.files[0]);
+        //upload thumbs product
+        var formData2 = new FormData();
+        images.forEach((item) => {
+            // arrayFileThumbs.push(item.file);
+            formData2.append('files', item.file);
+        });
+        arrApi.push(fileService.uploadMultiFile(formData2));
 
-        //upload ithumbs product
-        const arrayFileThumbs = []
-        images.forEach(item => {
-            arrayFileThumbs.push(item.file)
-        })
-        console.log(arrayFileThumbs);
-        // var formData2 = new FormData();
-        // formData2.append('files', arrayFileThumbs);
-        // arrApi.push(fileService.uploadMultilFile(formData2))
+        var formData3 = new FormData();
+        body.tierModels[0].models.forEach((item) => {
+            formData3.append('files', item.file);
+        });
+        arrApi.push(fileService.uploadMultiFile(formData2));
 
-        const arrayImageModel = []
-        body.tierModels[0].forEach(item => {
-            arrayImageModel.push(item.file)
-        })
+        Promise.all(arrApi).then(async (res) => {
+            console.log(res);
 
+            body.image = res[0].data.id;
 
-        // var formData3 = new FormData();
-        // formData3.append('file', arrayImageModel);
-        // arrApi.push(fileService.uploadMultilFile(formData2))
+            res[1].data.forEach((item) => body.images.push(item.id));
+            console.log(body.tierModels[0].models);
+            res[2].data.forEach((item, index) => {
+                console.log(body.tierModels[0].models[index]);
+                body.tierModels[0].models[index].image = item.id;
+            });
 
-        // Promise.all(arrApi).then(res => console.log(res))
-
-        // const fileLogo = inputFileLogo && inputFileLogo.current.files[0];
-        // const fileImage = inputFileImage && inputFileImage.current.files[0];
-
-        // if (fileLogo && fileImage && brandObj.name) {
-        //     var formDataLogo = new FormData();
-        //     formDataLogo.append('file', fileLogo);
-
-        //     var formDataImage = new FormData();
-        //     formDataImage.append('file', fileImage);
-
-        //     const resUploadFileLogo = fileService.upload(formDataLogo);
-        //     const resUploadFileImage = fileService.upload(formDataImage);
-        //     setLoading(true);
-        //     Promise.all([resUploadFileLogo, resUploadFileImage])
-        //         .then(async (values) => {
-        //             brandObj.logo = values[0].data.id;
-        //             brandObj.image = values[1].data.id;
-        //             console.log(brandObj);
-        //             const reqBanner = await brandService.create(brandObj);
-        //             setLoading(false);
-        //             if (reqBanner.status === 201) {
-        //                 toast.success('Save Successfully!');
-        //             } else {
-        //                 toast.error(reqBanner.errors.message);
-        //             }
-        //         })
-        //         .catch((error) => toast.error(error));
-        // }
+            const req = await productService.create(body);
+            console.log(req);
+            if (req.status === 201) {
+                toast.success('Save Successfully!');
+            } else {
+                toast.error(req.errors.message);
+            }
+        });
     };
 
     const handleAddModelUI = (tierModelChildContainerId, tierModelChildItemIdPattern, showFieldParent = false) => {
@@ -296,7 +276,7 @@ function CreateProduct() {
                                         />
                                     </FormGroup>
 
-                                    <FormGroup className="mb-2">
+                                    {/* <FormGroup className="mb-2">
                                         <label className="form-control-label mb-1">
                                             Parent
                                         </label>
@@ -306,7 +286,7 @@ function CreateProduct() {
                                             className="form-control-alternative"
                                             placeholder="Ex: Red"
                                         />
-                                    </FormGroup>
+                                    </FormGroup> */}
                                 </Col>
 
                                 <Col style={{ flex: 1, flexShrink: 0 }}>
@@ -331,8 +311,6 @@ function CreateProduct() {
                                             onClick={() => handleUploadImageModel(modelId)} //tierModel-child-item-1
                                         ></div>
                                     </FormGroup>
-
-
                                 </Col>
                             </Row>
                         </Col>
@@ -357,8 +335,6 @@ function CreateProduct() {
             toast.error(res.errors.message);
         }
     };
-
-
 
     const handleOnChange = (imageList) => {
         setImages(imageList);
@@ -417,8 +393,8 @@ function CreateProduct() {
                                                 className="form-control-alternative"
                                                 placeholder="Ex: Product"
                                                 type="text"
-                                            // name="name"
-                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                // name="name"
+                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -464,7 +440,7 @@ function CreateProduct() {
                                                 pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 10%"
-                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -477,7 +453,7 @@ function CreateProduct() {
                                                 pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 1000"
-                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -490,7 +466,7 @@ function CreateProduct() {
                                                     type="textarea"
                                                     className="form-control form-control-alternative"
                                                     placeholder="Ex: product01, product01"
-                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                    // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                                 />
                                             </div>
                                         </FormGroup>
@@ -547,7 +523,7 @@ function CreateProduct() {
                                     </Col>
                                 </Row>
 
-                                <div id={parentId} className='mb-2'>
+                                <div id={parentId} className="mb-2">
                                     <Row>
                                         <Col style={{ flex: 1 }}>
                                             <FormGroup className="mb-2">
@@ -680,164 +656,15 @@ function CreateProduct() {
                                     <Button
                                         className="btn btn-icon btn-success mx-5"
                                         style={{ minWidth: '100px' }}
-                                        onClick={() => handleAddModelUI(tierModelChildContainerId, tierModelChildItemIdPattern)}
+                                        onClick={() =>
+                                            handleAddModelUI(tierModelChildContainerId, tierModelChildItemIdPattern)
+                                        }
                                     >
                                         <span className="btn-inner--text">Add Model</span>
                                     </Button>
-
                                 </div>
 
-                                {/* <div id="tierModelChild"></div> */}
-
-                                <div id={parentId2} className='mb-2'>
-                                    <Row>
-                                        <Col style={{ flex: 1 }}>
-                                            <FormGroup className="mb-2">
-                                                <label className="form-control-label mb-1">Name Type Model Child</label>
-                                                <Input
-                                                    type="text"
-                                                    className="form-control-alternative"
-                                                    placeholder="Ex: Size"
-                                                    name="name-type-model"
-                                                />
-                                            </FormGroup>
-                                        </Col>
-                                    </Row>
-
-                                    <label className="form-control-label mb-1 mx-5">Models</label>
-
-                                    <div id={tierModelChildContainerId2}>
-                                        <div id={`${tierModelChildItemIdPattern2}1`} data-id="1">
-                                            <Card className="shadow mx-5 mb-2">
-                                                <Row
-                                                    className="pt-3 px-2 d-flex flex-column"
-                                                    id="example-collapse-text"
-                                                >
-                                                    <Col>
-                                                        <Row>
-                                                            <Col style={{ flex: 1 }}>
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Name
-                                                                    </label>
-                                                                    <Input
-                                                                        type="text"
-                                                                        name="name"
-                                                                        className="form-control-alternative"
-                                                                        placeholder="Ex: XXL"
-                                                                    />
-                                                                </FormGroup>
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Price
-                                                                    </label>
-                                                                    <Input
-                                                                        type="number"
-                                                                        pattern="[0,9].*"
-                                                                        name="price"
-                                                                        className="form-control-alternative"
-                                                                        placeholder="Ex: 100000"
-                                                                    />
-                                                                </FormGroup>
-                                                            </Col>
-                                                            <Col style={{ flex: 1 }}>
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Stock
-                                                                    </label>
-                                                                    <Input
-                                                                        type="number"
-                                                                        pattern="[0,9].*"
-                                                                        name="stock"
-                                                                        className="form-control-alternative"
-                                                                        placeholder="Ex: 100"
-                                                                    />
-                                                                </FormGroup>
-
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Parent
-                                                                    </label>
-                                                                    <Input
-                                                                        type="text"
-                                                                        name="parent"
-                                                                        className="form-control-alternative"
-                                                                        placeholder="Ex: Red"
-                                                                    />
-                                                                </FormGroup>
-                                                            </Col>
-
-                                                            <Col style={{ flex: 1, flexShrink: 0 }}>
-                                                                <input
-                                                                    type="file"
-                                                                    accept=".jpg,.jpeg,.png"
-                                                                    name="image"
-                                                                    hidden
-                                                                    onChange={(e) =>
-                                                                        readURL(
-                                                                            e.target,
-                                                                            'tierModel-child-item-1',
-                                                                            'image-review',
-                                                                        )
-                                                                    }
-                                                                />
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Image
-                                                                    </label>
-                                                                    <div
-                                                                        id="image-review"
-                                                                        className="rounded shadow"
-                                                                        style={{
-                                                                            backgroundRepeat: 'no-repeat',
-                                                                            paddingTop: '80%',
-                                                                            backgroundSize: 'cover',
-                                                                            cursor: 'pointer',
-                                                                        }}
-                                                                        onClick={() =>
-                                                                            handleUploadImageModel(
-                                                                                'tierModel-child-item-1',
-                                                                            )
-                                                                        }
-                                                                    ></div>
-
-                                                                    {/* <img
-                                                                        id="image-review"
-                                                                        src="#"
-                                                                        alt="images"
-                                                                        className="rounded shadow"
-                                                                        style={{
-                                                                            minHeight: '180px',
-                                                                            minWidth: '100%',
-                                                                            height: '180px',
-                                                                            width: '100%',
-                                                                            cursor: 'pointer',
-                                                                        }}
-                                                                        onClick={() =>
-                                                                            handleUploadImageModel(
-                                                                                'tierModel-child-item-1',
-                                                                            )
-                                                                        }
-                                                                    ></img> */}
-                                                                </FormGroup>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
-                                            </Card>
-                                        </div>
-                                    </div>
-
-                                    <Button
-                                        className="btn btn-icon btn-success mx-5"
-                                        style={{ minWidth: '100px' }}
-                                        onClick={() => handleAddModelUI(tierModelChildContainerId2, tierModelChildItemIdPattern2, true)}
-                                    >
-                                        <span className="btn-inner--text">Add Model</span>
-                                    </Button>
-
-                                </div>
-
+                                <div id="tierModelChild"></div>
 
                                 <Row>
                                     <Col style={{ flex: 1 }}>

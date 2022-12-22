@@ -12,7 +12,7 @@ export const upload = async (data) => {
     return res;
 };
 
-export const uploadMultilFile = async (data) => {
+export const uploadMultiFile = async (data) => {
     const configHeader = {
         headers: {
             'Content-Type': 'multipart/form-data',
