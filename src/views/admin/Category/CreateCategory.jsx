@@ -35,13 +35,14 @@ function CreateCategory() {
         name: '',
         logo: '',
         path: '',
+        file: null,
         status: 1,
     });
 
     const inputPictureOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
-            setCateObj({ ...cateObj, path: URL.createObjectURL(file) });
+            setCateObj({ ...cateObj, path: URL.createObjectURL(file), file });
         }
     };
 
@@ -59,13 +60,13 @@ function CreateCategory() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const file = inputFile && inputFile.current.files[0];
-        if (file && cateObj.name) {
+        if (cateObj.file && cateObj.name) {
             var formData = new FormData();
-            formData.append('file', file);
+            formData.append('file', cateObj.file);
 
             setLoading(true);
             const resUploadFile = await fileService.upload(formData);
+            setLoading(false);
             if (resUploadFile.status === 201) {
                 cateObj.logo = resUploadFile.data.id;
                 createCate(cateObj);
