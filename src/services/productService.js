@@ -1,7 +1,7 @@
 import * as httpRequest from '~/utils/httpRequest';
-const token = JSON.parse(localStorage.getItem('token')) || null;
 
 export const getAll = async (body = {}, params = {}) => {
+    const token = JSON.parse(localStorage.getItem('token')) || null;
     const configHeader = {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -14,6 +14,7 @@ export const getAll = async (body = {}, params = {}) => {
 };
 
 export const getBannerById = async (id) => {
+    const token = JSON.parse(localStorage.getItem('token')) || null;
     const configHeader = {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -25,6 +26,7 @@ export const getBannerById = async (id) => {
 };
 
 export const remove = async (id) => {
+    const token = JSON.parse(localStorage.getItem('token')) || null;
     const configHeader = {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -36,6 +38,7 @@ export const remove = async (id) => {
 };
 
 export const create = async (body = {}) => {
+    const token = JSON.parse(localStorage.getItem('token')) || null;
     const configHeader = {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -47,6 +50,7 @@ export const create = async (body = {}) => {
 };
 
 export const update = async (body = {}) => {
+    const token = JSON.parse(localStorage.getItem('token')) || null;
     const configHeader = {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -58,6 +62,7 @@ export const update = async (body = {}) => {
 };
 
 export const searChing = async (body = {}, params = {}) => {
+    const token = JSON.parse(localStorage.getItem('token')) || null;
     const configHeader = {
         headers: {
             Authorization: `Bearer ${token}`,

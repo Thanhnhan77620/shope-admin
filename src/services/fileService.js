@@ -1,7 +1,7 @@
 import * as httpRequest from '~/utils/httpRequest';
-const token = JSON.parse(localStorage.getItem('token')) || null;
 
 export const upload = async (data) => {
+    const token = JSON.parse(localStorage.getItem('token')) || null;
     const configHeader = {
         headers: {
             'Content-Type': 'multipart/form-data',
@@ -13,6 +13,7 @@ export const upload = async (data) => {
 };
 
 export const uploadMultiFile = async (data) => {
+    const token = JSON.parse(localStorage.getItem('token')) || null;
     const configHeader = {
         headers: {
             'Content-Type': 'multipart/form-data',

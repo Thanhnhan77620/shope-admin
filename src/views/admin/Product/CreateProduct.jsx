@@ -34,7 +34,6 @@ import ImageUploader from '~/components/ImageUploader';
 
 //services
 import * as brandService from '~/services/brandService';
-import * as categoryService from '~/services/categoryService';
 import * as fileService from '~/services/fileService';
 import * as productService from '~/services/productService';
 
@@ -42,22 +41,10 @@ function CreateProduct() {
     const [loading, setLoading] = useState(false);
     const [brands, setBrands] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [description, setDescription] = useState('');
     const [productImagePath, setProductImagePath] = useState('');
     const [images, setImages] = useState([]);
-    const [brandObj, setBrandObj] = useState({
-        name: '',
-        description: '',
-        cate: '',
-        image: '',
-        images: [],
-        discount: 0,
-        priceBeforeDiscount: 0,
-        stock: 0,
-        brand: '',
-        categories: '',
-        status: 1,
-    });
+    const [parentModels, setParentModels] = useState([]);
+    const [parentKeyModels, serParentKeyModels] = useState([]);
     const [productObj, setProductObj] = useState({
         name: '',
         description: '',
@@ -72,39 +59,19 @@ function CreateProduct() {
         status: 1,
     });
 
-    const inputFileLogo = useRef();
-    const inputFileImage = useRef();
-
     const inputProductImage = useRef();
     const inputProductName = useRef();
     const inputProductDiscount = useRef();
     const inputProductStock = useRef();
-    const inputProductPrice = useRef();
     const inputProductKeyword = useRef();
 
-    const parentId = 'tierModel';
-    const tierModelChildContainerId = 'tierModel-child-container';
-    const tierModelChildItemIdPattern = 'tierModel-child-item-';
+    const parentId = 'tierModel'
+    const tierModelChildContainerId = 'tierModel-child-container'
+    const tierModelChildItemIdPattern = 'tierModel-child-item-'
 
-    const parentId2 = 'tierModelChild';
-    const tierModelChildContainerId2 = 'tierModelChild-child-container';
-    const tierModelChildItemIdPattern2 = 'tierModelChild-child-item-';
-
-    const input = useRef();
-
-    const inputLogoOnchange = (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (file) {
-            setBrandObj({ ...brandObj, pathLogo: URL.createObjectURL(file) });
-        }
-    };
-
-    const inputImageOnchange = (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (file) {
-            setBrandObj({ ...brandObj, pathImage: URL.createObjectURL(file) });
-        }
-    };
+    const parentId2 = 'tierModelChild'
+    const tierModelChildContainerId2 = 'tierModelChild-child-container'
+    const tierModelChildItemIdPattern2 = 'tierModelChild-child-item-'
 
     const inputProductImageOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
@@ -146,12 +113,19 @@ function CreateProduct() {
             tierModel: parentElContainer.querySelector('input[name=name-type-model]').value,
             models: [],
         };
+
+        function filterParent(modeId) {
+            const result = parentKeyModels.find(a => a.id === modeId)
+            return result ? result.name : null
+        }
+
         parentEl[0].childNodes.forEach((el) => {
             const model = {
-                name: el.querySelector('input[name=name]').value,
-                priceBeforeDiscount: +el.querySelector('input[name=price]').value,
-                stock: +el.querySelector('input[name=stock]').value,
-                file: el.querySelector('input[name=image]').files[0],
+                name: el.querySelector('input[name=name]') && el.querySelector('input[name=name]').value,
+                priceBeforeDiscount: el.querySelector('input[name=price]') && +el.querySelector('input[name=price]').value,
+                stock: el.querySelector('input[name=stock]') && +el.querySelector('input[name=stock]').value,
+                file: el.querySelector('input[name=image]') && el.querySelector('input[name=image]').files[0],
+                parent: filterParent(el.id),
                 image: '',
             };
             tierModel.models.push(model);
@@ -159,79 +133,19 @@ function CreateProduct() {
         return tierModel;
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const content = inputProductKeyword.current.value;
-        const keyWords = [];
-        content.split(',').forEach((item) => {
-            if (item.trim()) {
-                keyWords.push(item.trim());
+    const setParentModel = (parentId, containerId) => {
+        const parentElContainer = document.getElementById(parentId);
+        const parentEl = parentElContainer.querySelectorAll(`#${containerId}`);
+        const parentModel = []
+        parentEl[0].childNodes.forEach((el) => {
+            if (el.querySelector('input[name=name]')) {
+                parentModel.push({ name: el.querySelector('input[name=name]').value });
             }
         });
-
-        let body = {
-            ...productObj,
-            name: inputProductName.current.value,
-            discount: +inputProductDiscount.current.value,
-            priceBeforeDiscount: +inputProductPrice.current.value,
-            stock: +inputProductStock.current.value,
-            keywords: keyWords,
-            tierModels: [getValuesModel(parentId, tierModelChildContainerId)],
-        };
-        // setProductObj((prev) => {
-        //     const tierModel = getValuesModel(parentId, tierModelChildContainerId);
-        //     return {
-        //         ...prev,
-        //         name: inputProductName.current.value,
-        //         discount: +inputProductDiscount.current.value,
-        //         priceBeforeDiscount: +inputProductPrice.current.value,
-        //         stock: +inputProductStock.current.value,
-        //         keywords: keyWords,
-        //         tierModels: prev.tierModels.push(tierModel),
-        //     };
-        // });
-        // console.log(body);
-
-        const arrApi = [];
-        // upload image product
-        var formData1 = new FormData();
-        formData1.append('file', inputProductImage.current.files[0]);
-        arrApi.push(fileService.upload(formData1));
-
-        //upload thumbs product
-        var formData2 = new FormData();
-        images.forEach((item) => {
-            // arrayFileThumbs.push(item.file);
-            formData2.append('files', item.file);
-        });
-        arrApi.push(fileService.uploadMultiFile(formData2));
-
-        var formData3 = new FormData();
-        body.tierModels[0].models.forEach((item) => {
-            formData3.append('files', item.file);
-        });
-        arrApi.push(fileService.uploadMultiFile(formData3));
-
-        Promise.all(arrApi).then((res) => {
-            console.log(res);
-            body.image = res[0].data.id;
-            res[1].data.forEach((item) => body.images.push(item.id));
-            res[2].data.forEach((item, index) => {
-                body.tierModels[0].models[index].image = item.id;
-            });
-
-            Promise.resolve(productService.create(body)).then((req) => {
-                if (req.status === 201) {
-                    toast.success('Save Successfully!');
-                } else {
-                    toast.error(req.errors.message);
-                }
-            });
-        });
-    };
+        setParentModels(parentModel)
+    }
 
     const handleAddModelUI = (tierModelChildContainerId, tierModelChildItemIdPattern, showFieldParent = false) => {
-        console.log(showFieldParent);
         const parentNode = document.getElementById(tierModelChildContainerId);
         const length = parentNode.childNodes.length;
         const dataId = length ? +parentNode.lastChild.getAttribute('data-id') + 1 : 1;
@@ -255,6 +169,7 @@ function CreateProduct() {
                                             name="name"
                                             className="form-control-alternative"
                                             placeholder="Ex: XXL"
+                                            onBlur={() => !showFieldParent && setParentModel(parentId, tierModelChildContainerId)}
                                         />
                                     </FormGroup>
                                     <FormGroup className="mb-2">
@@ -280,17 +195,19 @@ function CreateProduct() {
                                         />
                                     </FormGroup>
 
-                                    {/* <FormGroup className="mb-2">
+                                    {showFieldParent && <FormGroup className="mb-2">
                                         <label className="form-control-label mb-1">
                                             Parent
                                         </label>
-                                        <Input
-                                            type="text"
-                                            name="parent"
-                                            className="form-control-alternative"
-                                            placeholder="Ex: Red"
+                                        <MultiSelectDropdown
+                                            selectionLimit={1}
+                                            onRemove={(a, b) => handleOnRemoveParent(a, b, modelId)}
+                                            onSelect={(a, b) => handleOnSelectParent(a, b, modelId)}
+                                            options={parentModels}
+                                            placeholder="Search parent model ..."
+                                            emptyRecordMsg="Empty parent model"
                                         />
-                                    </FormGroup> */}
+                                    </FormGroup>}
                                 </Col>
 
                                 <Col style={{ flex: 1, flexShrink: 0 }}>
@@ -315,6 +232,8 @@ function CreateProduct() {
                                             onClick={() => handleUploadImageModel(modelId)} //tierModel-child-item-1
                                         ></div>
                                     </FormGroup>
+
+
                                 </Col>
                             </Row>
                         </Col>
@@ -329,6 +248,7 @@ function CreateProduct() {
 
     const handleRemoveModelUI = (modelId) => {
         document.getElementById(modelId).remove();
+        setParentModel(parentId, tierModelChildContainerId)
     };
 
     const getBrandById = async (id) => {
@@ -337,6 +257,16 @@ function CreateProduct() {
             setCategories(res.data.categories);
         } else {
             toast.error(res.errors.message);
+        }
+    };
+
+    const handleOnRemoveParent = (a, b, tierModelChildItemId) => {
+        serParentKeyModels(prev => ([...prev.filter(x => x.id !== tierModelChildItemId)]))
+    };
+
+    const handleOnSelectParent = (a, b, tierModelChildItemId) => {
+        if (parentKeyModels.findIndex(x => x.id === tierModelChildItemId) === -1) {
+            serParentKeyModels(prev => ([...prev, { id: tierModelChildItemId, name: b.name }]))
         }
     };
 
@@ -351,6 +281,7 @@ function CreateProduct() {
         const model = document.getElementById(modelId);
         if (input.files && input.files[0]) {
             var reader = new FileReader();
+            console.log(model.querySelectorAll('#image-review')[0]);
             reader.onload = function (e) {
                 // model.getElementsByTagName('img')[0].setAttribute('src', e.target.result);
                 model.querySelectorAll('#image-review')[0].style.backgroundImage = `url('${e.target.result}')`;
@@ -363,6 +294,63 @@ function CreateProduct() {
         const modelEl = document.getElementById(modelId);
         const inputFile = modelEl.querySelector('input[type=file]');
         inputFile.click();
+    };
+
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const content = inputProductKeyword.current.value;
+        const keyWords = [];
+        content.split(',').forEach((item) => {
+            if (item.trim()) {
+                keyWords.push(item.trim());
+            }
+        });
+
+        const body = {
+            ...productObj,
+            name: inputProductName.current.value,
+            discount: +inputProductDiscount.current.value,
+            stock: +inputProductStock.current.value,
+            keywords: keyWords,
+            tierModels: [getValuesModel(parentId, tierModelChildContainerId), getValuesModel(parentId2, tierModelChildContainerId2)],
+        }
+
+        const arrApi = [];
+        // upload image product
+        var formData1 = new FormData();
+        formData1.append('file', inputProductImage.current.files[0]);
+        arrApi.push(fileService.upload(formData1));
+
+        //upload thumbs product
+        var formData2 = new FormData();
+        images.forEach((item) => {
+            // arrayFileThumbs.push(item.file);
+            formData2.append('files', item.file);
+        });
+        arrApi.push(fileService.uploadMultiFile(formData2));
+
+        var formData3 = new FormData();
+        body.tierModels[0].models.forEach((item) => {
+            formData3.append('files', item.file);
+        });
+        arrApi.push(fileService.uploadMultiFile(formData3));
+
+        Promise.all(arrApi).then((res) => {
+            body.image = res[0].data.id;
+            res[1].data.forEach((item) => body.images.push(item.id));
+            res[2].data.forEach((item, index) => {
+                body.tierModels[0].models[index].image = item.id;
+            });
+
+            Promise.resolve(productService.create(body)).then((req) => {
+                if (req.status === 201) {
+                    toast.success('Save Successfully!');
+                } else {
+                    toast.error(req.errors.message);
+                }
+            });
+        });
     };
 
     useEffect(() => {
@@ -396,8 +384,8 @@ function CreateProduct() {
                                                 className="form-control-alternative"
                                                 placeholder="Ex: Product"
                                                 type="text"
-                                                // name="name"
-                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                            // name="name"
+                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -436,19 +424,6 @@ function CreateProduct() {
                                 <Row>
                                     <Col style={{ flex: 1 }}>
                                         <FormGroup className="mb-2">
-                                            <label className="form-control-label mb-1">Price</label>
-                                            <Input
-                                                innerRef={inputProductPrice}
-                                                type="number"
-                                                pattern="[0,9].*"
-                                                className="form-control-alternative"
-                                                placeholder="Ex: 100000"
-                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
-                                            />
-                                        </FormGroup>
-                                    </Col>
-                                    <Col style={{ flex: 1 }}>
-                                        <FormGroup className="mb-2">
                                             <label className="form-control-label mb-1">Discount</label>
                                             <Input
                                                 innerRef={inputProductDiscount}
@@ -456,7 +431,7 @@ function CreateProduct() {
                                                 pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 10%"
-                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -469,7 +444,7 @@ function CreateProduct() {
                                                 pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 1000"
-                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -482,7 +457,7 @@ function CreateProduct() {
                                                     type="textarea"
                                                     className="form-control form-control-alternative"
                                                     placeholder="Ex: product01, product01"
-                                                    // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
+                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                                 />
                                             </div>
                                         </FormGroup>
@@ -539,7 +514,7 @@ function CreateProduct() {
                                     </Col>
                                 </Row>
 
-                                <div id={parentId} className="mb-2">
+                                <div id={parentId} className='mb-2'>
                                     <Row>
                                         <Col style={{ flex: 1 }}>
                                             <FormGroup className="mb-2">
@@ -575,6 +550,7 @@ function CreateProduct() {
                                                                         name="name"
                                                                         className="form-control-alternative"
                                                                         placeholder="Ex: XXL"
+                                                                        onBlur={() => setParentModel(parentId, tierModelChildContainerId)}
                                                                     />
                                                                 </FormGroup>
                                                                 <FormGroup className="mb-2">
@@ -672,15 +648,166 @@ function CreateProduct() {
                                     <Button
                                         className="btn btn-icon btn-success mx-5"
                                         style={{ minWidth: '100px' }}
-                                        onClick={() =>
-                                            handleAddModelUI(tierModelChildContainerId, tierModelChildItemIdPattern)
-                                        }
+                                        onClick={() => handleAddModelUI(tierModelChildContainerId, tierModelChildItemIdPattern)}
                                     >
                                         <span className="btn-inner--text">Add Model</span>
                                     </Button>
+
                                 </div>
 
-                                <div id="tierModelChild"></div>
+                                {/* <div id="tierModelChild"></div> */}
+
+                                <div id={parentId2} className='mb-2'>
+                                    <Row>
+                                        <Col style={{ flex: 1 }}>
+                                            <FormGroup className="mb-2">
+                                                <label className="form-control-label mb-1">Name Type Model Child</label>
+                                                <Input
+                                                    type="text"
+                                                    className="form-control-alternative"
+                                                    placeholder="Ex: Size"
+                                                    name="name-type-model"
+                                                />
+                                            </FormGroup>
+                                        </Col>
+                                    </Row>
+
+                                    <label className="form-control-label mb-1 mx-5">Models</label>
+
+                                    <div id={tierModelChildContainerId2}>
+                                        <div id={`${tierModelChildItemIdPattern2}1`} data-id="1">
+                                            <Card className="shadow mx-5 mb-2">
+                                                <Row
+                                                    className="pt-3 px-2 d-flex flex-column"
+                                                    id="example-collapse-text"
+                                                >
+                                                    <Col>
+                                                        <Row>
+                                                            <Col style={{ flex: 1 }}>
+                                                                <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Name
+                                                                    </label>
+                                                                    <Input
+                                                                        type="text"
+                                                                        name="name"
+                                                                        className="form-control-alternative"
+                                                                        placeholder="Ex: XXL"
+                                                                    />
+                                                                </FormGroup>
+                                                                <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Price
+                                                                    </label>
+                                                                    <Input
+                                                                        type="number"
+                                                                        pattern="[0,9].*"
+                                                                        name="price"
+                                                                        className="form-control-alternative"
+                                                                        placeholder="Ex: 100000"
+                                                                    />
+                                                                </FormGroup>
+                                                            </Col>
+                                                            <Col style={{ flex: 1 }}>
+                                                                <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Stock
+                                                                    </label>
+                                                                    <Input
+                                                                        type="number"
+                                                                        pattern="[0,9].*"
+                                                                        name="stock"
+                                                                        className="form-control-alternative"
+                                                                        placeholder="Ex: 100"
+                                                                    />
+                                                                </FormGroup>
+
+                                                                <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Parent
+                                                                    </label>
+                                                                    <MultiSelectDropdown
+                                                                        selectionLimit={1}
+                                                                        onRemove={(a, b) => handleOnRemoveParent(a, b, `${tierModelChildItemIdPattern2}1`)}
+                                                                        onSelect={(a, b) => handleOnSelectParent(a, b, `${tierModelChildItemIdPattern2}1`)}
+                                                                        options={parentModels}
+                                                                        placeholder="Search parent model ..."
+                                                                        emptyRecordMsg="Empty parent model"
+                                                                    />
+                                                                </FormGroup>
+                                                            </Col>
+
+                                                            <Col style={{ flex: 1, flexShrink: 0 }}>
+                                                                <input
+                                                                    type="file"
+                                                                    accept=".jpg,.jpeg,.png"
+                                                                    name="image"
+                                                                    hidden
+                                                                    onChange={(e) =>
+                                                                        readURL(
+                                                                            e.target,
+                                                                            'tierModel-child-item-1',
+                                                                            'image-review',
+                                                                        )
+                                                                    }
+                                                                />
+                                                                <FormGroup className="mb-2">
+                                                                    <label className="form-control-label mb-1">
+                                                                        Image
+                                                                    </label>
+                                                                    <div
+                                                                        id="image-review"
+                                                                        className="rounded shadow"
+                                                                        style={{
+                                                                            backgroundRepeat: 'no-repeat',
+                                                                            paddingTop: '80%',
+                                                                            backgroundSize: 'cover',
+                                                                            cursor: 'pointer',
+                                                                        }}
+                                                                        onClick={() =>
+                                                                            handleUploadImageModel(
+                                                                                'tierModel-child-item-1',
+                                                                            )
+                                                                        }
+                                                                    ></div>
+
+                                                                    {/* <img
+                                                                        id="image-review"
+                                                                        src="#"
+                                                                        alt="images"
+                                                                        className="rounded shadow"
+                                                                        style={{
+                                                                            minHeight: '180px',
+                                                                            minWidth: '100%',
+                                                                            height: '180px',
+                                                                            width: '100%',
+                                                                            cursor: 'pointer',
+                                                                        }}
+                                                                        onClick={() =>
+                                                                            handleUploadImageModel(
+                                                                                'tierModel-child-item-1',
+                                                                            )
+                                                                        }
+                                                                    ></img> */}
+                                                                </FormGroup>
+                                                            </Col>
+                                                        </Row>
+                                                    </Col>
+                                                </Row>
+                                            </Card>
+                                        </div>
+                                    </div>
+
+                                    <Button
+                                        className="btn btn-icon btn-success mx-5"
+                                        style={{ minWidth: '100px' }}
+                                        onClick={() => handleAddModelUI(tierModelChildContainerId2, tierModelChildItemIdPattern2, true)}
+                                    >
+                                        <span className="btn-inner--text">Add Model</span>
+                                    </Button>
+
+                                </div>
+
 
                                 <Row>
                                     <Col style={{ flex: 1 }}>

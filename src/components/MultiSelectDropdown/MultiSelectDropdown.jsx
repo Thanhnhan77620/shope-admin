@@ -1,6 +1,6 @@
 import Multiselect from 'multiselect-react-dropdown';
 
-function MultiSelectDropdown({ placeholder = 'Search ...', emptyRecordMsg = 'Empty option', options = null, selectedValues = null, onSelect, onRemove, selectionLimit }) {
+function MultiSelectDropdown({ id = '', placeholder = 'Search ...', emptyRecordMsg = 'Empty option', options = null, selectedValues = null, onSelect, onRemove, selectionLimit }) {
 
     const handleOnSelect = (selectedList, currentSelect) => {
         if (onSelect) {
@@ -25,7 +25,7 @@ function MultiSelectDropdown({ placeholder = 'Search ...', emptyRecordMsg = 'Emp
             selectionLimit={selectionLimit}
             className="mr-3"
             displayValue="name"
-            id="css_custom"
+            id={id}
             style={{
                 chips: {
                     background: 'green',
