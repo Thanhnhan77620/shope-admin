@@ -40,7 +40,7 @@ function Product() {
     const [params, setParams] = useState({
         page: 1,
         limit,
-        fields: 'id,name,likedCount,stock,price,sold',
+        fields: 'id,name,likedCount,stock,priceBeforeDiscount,discount,sold,status',
     });
     const inputSearch = useRef(null)
 
@@ -197,6 +197,9 @@ function Product() {
                                             price
                                         </th>
                                         <th scope="col" style={{ width: '%' }}>
+                                            discount
+                                        </th>
+                                        <th scope="col" style={{ width: '%' }}>
                                             likedCount
                                         </th>
                                         <th scope="col" style={{ width: '%' }}>
@@ -217,7 +220,8 @@ function Product() {
                                         <tr key={index} data-id={item.id} className="h-auto">
                                             <td>{limit * (params.page - 1) + index + 1}</td>
                                             <td>{item.name}</td>
-                                            <td>{item.price}</td>
+                                            <td>{item.priceBeforeDiscount}</td>
+                                            <td>{item.discount}</td>
                                             <td>{item.likedCount}</td>
                                             <td>{item.stock}</td>
                                             <td>{item.sold}</td>
@@ -230,6 +234,8 @@ function Product() {
                                                     )}
                                                     {item.status.name}
                                                 </Badge> */}
+
+
                                             </td>
                                             <td className="text-right">
                                                 <UncontrolledDropdown>
@@ -297,7 +303,7 @@ function Product() {
                 </Row>
             </Container>
             <ToastContainer />
-            <ModalPopup hidden={!loading} />
+            {/* <ModalPopup hidden={!loading} /> */}
         </>
     )
 }

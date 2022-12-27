@@ -145,6 +145,9 @@ function CreateProduct() {
         setParentModels(parentModel)
     }
 
+
+
+
     const handleAddModelUI = (tierModelChildContainerId, tierModelChildItemIdPattern, showFieldParent = false) => {
         const parentNode = document.getElementById(tierModelChildContainerId);
         const length = parentNode.childNodes.length;
@@ -655,7 +658,7 @@ function CreateProduct() {
 
                                 </div>
 
-                                {/* <div id="tierModelChild"></div> */}
+                                <div id="tierTest"></div>
 
                                 <div id={parentId2} className='mb-2'>
                                     <Row>
@@ -848,7 +851,7 @@ function CreateProduct() {
             </Row>
 
             <ToastContainer />
-            <ModalPopup hidden={!loading} />
+            {/* <ModalPopup hidden={!loading} /> */}
         </Container>
     );
 }

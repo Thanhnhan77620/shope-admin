@@ -269,7 +269,7 @@ function CreateBrand() {
             </Row>
 
             <ToastContainer />
-            <ModalPopup hidden={!loading} />
+            {/* <ModalPopup hidden={!loading} /> */}
         </Container>
     );
 }

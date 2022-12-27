@@ -331,7 +331,7 @@ function EditBrand() {
                 </div>
             </Row>
             <ToastContainer />
-            <ModalPopup hidden={!loading} />
+            {/* <ModalPopup hidden={!loading} /> */}
         </Container>
     );
 }

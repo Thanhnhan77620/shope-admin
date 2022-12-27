@@ -280,7 +280,7 @@ const Banner = () => {
                 </Row>
             </Container>
             <ToastContainer />
-            <ModalPopup hidden={!loading} />
+            {/* <ModalPopup hidden={!loading} /> */}
         </>
     );
 };
