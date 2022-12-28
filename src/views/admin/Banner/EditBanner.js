@@ -240,7 +240,7 @@ function EditBanner() {
                 </div>
             </Row>
             <ToastContainer />
-            {/* <ModalPopup hidden={!loading} /> */}
+            <ModalPopup hidden={!loading} />
         </Container>
     );
 }

@@ -118,7 +118,6 @@ function EditBrand() {
         } else {
             toast.error(res.errors.message);
         }
-
     };
 
     const getBannerById = async () => {
@@ -141,7 +140,7 @@ function EditBrand() {
                 categoriesDisplay: categories,
                 description,
                 status: status.id,
-                statusName: status.name
+                statusName: status.name,
             }));
         }
     };
@@ -311,7 +310,10 @@ function EditBrand() {
                                                     style={{ minWidth: '100px' }}
                                                     onClick={handleInActive}
                                                 >
-                                                    <span className="btn-inner--text"> {brandObj.statusName === 'Active' ? 'InActive' : 'Active'}</span>
+                                                    <span className="btn-inner--text">
+                                                        {' '}
+                                                        {brandObj.statusName === 'Active' ? 'InActive' : 'Active'}
+                                                    </span>
                                                 </Button>
                                                 <Link
                                                     to="/admin/brands"
@@ -331,7 +333,7 @@ function EditBrand() {
                 </div>
             </Row>
             <ToastContainer />
-            {/* <ModalPopup hidden={!loading} /> */}
+            <ModalPopup hidden={!loading} />
         </Container>
     );
 }

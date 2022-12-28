@@ -31,6 +31,7 @@ const Login = () => {
         const loginApi = async () => {
             setLoading(true);
             const res = await authService.login({ email: e.target.email.value, password: e.target.password.value });
+            console.log(res);
             setLoading(false);
             if (res.status === 200) {
                 const action = login(res.data);
@@ -135,7 +136,7 @@ const Login = () => {
                 </Row>
             </Col>
             <ToastContainer />
-            {/* <ModalPopup hidden={!loading} /> */}
+            <ModalPopup hidden={!loading} />
         </>
     );
 };

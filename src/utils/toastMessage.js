@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 
-const notify = (type, message = 'Info', autoClose = 2000) => {
+const notify = (type, message = 'Info', autoClose = 1000) => {
     const config = {
         position: "top-right",
         autoClose,

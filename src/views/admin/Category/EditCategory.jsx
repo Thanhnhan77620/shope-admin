@@ -1,18 +1,7 @@
 // reactstrap components
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-    Input,
-    Card,
-    CardHeader,
-    CardBody,
-    Container,
-    Row,
-    FormGroup,
-    Form,
-    Col,
-    Button,
-} from 'reactstrap';
+import { Input, Card, CardHeader, CardBody, Container, Row, FormGroup, Form, Col, Button } from 'reactstrap';
 import { ToastContainer, toast } from 'react-toastify';
 
 //services
@@ -90,7 +79,6 @@ function EditCategory() {
         } else {
             toast.error(res.errors.message);
         }
-
     };
 
     // fetch API
@@ -106,7 +94,6 @@ function EditCategory() {
         }
     };
     useEffect(() => {
-
         if (+id) {
             getCateById();
         }
@@ -139,7 +126,6 @@ function EditCategory() {
                                             <div className="d-flex">
                                                 <Button
                                                     className="btn btn-icon btn-success"
-
                                                     style={{ minWidth: '100px' }}
                                                     onClick={handleSubmit}
                                                 >
@@ -147,11 +133,12 @@ function EditCategory() {
                                                 </Button>
                                                 <Button
                                                     className="btn btn-icon btn-danger"
-
                                                     style={{ minWidth: '100px' }}
                                                     onClick={handleInActive}
                                                 >
-                                                    <span className="btn-inner--text">{cateObj.statusName === 'Active' ? 'InActive' : 'Active'}</span>
+                                                    <span className="btn-inner--text">
+                                                        {cateObj.statusName === 'Active' ? 'InActive' : 'Active'}
+                                                    </span>
                                                 </Button>
                                                 <Link
                                                     to="/admin/categories"
@@ -208,7 +195,7 @@ function EditCategory() {
                 </div>
             </Row>
             <ToastContainer />
-            {/* <ModalPopup hidden={!loading} /> */}
+            <ModalPopup hidden={!loading} />
         </Container>
     );
 }

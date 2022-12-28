@@ -20,14 +20,13 @@ import {
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import { useRef } from 'react';
 
 //custom component
 import ModalPopup from '~/components/ModalPopup';
 
 //services
-import * as productService from '~/services/productService'
-import { useRef } from 'react';
-
+import * as productService from '~/services/productService';
 
 function Product() {
     const limit = 5;
@@ -42,7 +41,7 @@ function Product() {
         limit,
         fields: 'id,name,likedCount,stock,priceBeforeDiscount,discount,sold,status',
     });
-    const inputSearch = useRef(null)
+    const inputSearch = useRef(null);
 
     // let params = {
     //     page: 1,
@@ -57,7 +56,7 @@ function Product() {
                 <PaginationItem key={i} className={params.page === i ? 'active' : ''}>
                     <PaginationLink
                         onClick={(e) => {
-                            setParams(prevSate => ({ ...params, page: +e.target.innerText }))
+                            setParams((prevSate) => ({ ...params, page: +e.target.innerText }));
                             // params.page = +e.target.innerText;
                             // getProductsApi();
                         }}
@@ -85,10 +84,9 @@ function Product() {
 
     const handleEnterSearch = (e) => {
         if (e.key === 'Enter') {
-            setKeySearch(inputSearch.current.value)
+            setKeySearch(inputSearch.current.value);
         }
-
-    }
+    };
 
     //fetch API
     const getProductsApi = async () => {
@@ -127,14 +125,12 @@ function Product() {
 
     useEffect(() => {
         if (keySearch) {
-            searching()
+            searching();
         } else {
-            getProductsApi()
+            getProductsApi();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [keySearch, params]);
-
-
 
     return (
         <>
@@ -234,8 +230,6 @@ function Product() {
                                                     )}
                                                     {item.status.name}
                                                 </Badge> */}
-
-
                                             </td>
                                             <td className="text-right">
                                                 <UncontrolledDropdown>
@@ -278,7 +272,9 @@ function Product() {
                                     >
                                         <PaginationItem className={params.page === 1 ? 'disabled' : ''}>
                                             <PaginationLink
-                                                onClick={() => setParams(prevSate => ({ ...params, page: prevSate.page - 1 }))}
+                                                onClick={() =>
+                                                    setParams((prevSate) => ({ ...params, page: prevSate.page - 1 }))
+                                                }
                                                 tabIndex="-1"
                                             >
                                                 <i className="fas fa-angle-left" />
@@ -290,7 +286,11 @@ function Product() {
                                         {renderPaging(totalPage)}
 
                                         <PaginationItem className={params.page === totalPage ? 'disabled' : ''}>
-                                            <PaginationLink onClick={() => setParams(prevSate => ({ ...params, page: prevSate.page + 1 }))}>
+                                            <PaginationLink
+                                                onClick={() =>
+                                                    setParams((prevSate) => ({ ...params, page: prevSate.page + 1 }))
+                                                }
+                                            >
                                                 <i className="fas fa-angle-right" />
                                                 <span className="sr-only">Next</span>
                                             </PaginationLink>
@@ -303,9 +303,9 @@ function Product() {
                 </Row>
             </Container>
             <ToastContainer />
-            {/* <ModalPopup hidden={!loading} /> */}
+            <ModalPopup hidden={!loading} />
         </>
-    )
+    );
 }
 
-export default Product
+export default Product;

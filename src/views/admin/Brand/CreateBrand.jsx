@@ -31,39 +31,37 @@ function CreateBrand() {
     const inputFileLogo = useRef();
     const inputFileImage = useRef();
 
-
     const keyBanners = Object.keys(BannerType);
     keyBanners.shift();
 
     const inputLogoOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
-            setBrandObj({ ...brandObj, pathLogo: URL.createObjectURL(file) })
+            setBrandObj({ ...brandObj, pathLogo: URL.createObjectURL(file) });
         }
     };
 
     const inputImageOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
         if (file) {
-            setBrandObj({ ...brandObj, pathImage: URL.createObjectURL(file) })
+            setBrandObj({ ...brandObj, pathImage: URL.createObjectURL(file) });
         }
     };
 
     const handleOnSelect = (selectedList, currentSelect) => {
-        setBrandObj({ ...brandObj, categories: [...brandObj.categories, currentSelect.id] })
-    }
+        setBrandObj({ ...brandObj, categories: [...brandObj.categories, currentSelect.id] });
+    };
 
     const handleOnRemove = (selectedList, currentSelect) => {
-        setBrandObj({ ...brandObj, categories: brandObj.categories.filter(e => e !== currentSelect.id) })
-    }
-
+        setBrandObj({ ...brandObj, categories: brandObj.categories.filter((e) => e !== currentSelect.id) });
+    };
 
     const handleOnChangeContext = (editor) => {
-        setBrandObj(prevObj => ({
+        setBrandObj((prevObj) => ({
             ...prevObj,
-            description: editor.current.getCharCount() ? editor.current.getContents() : ''
-        }))
-    }
+            description: editor.current.getCharCount() ? editor.current.getContents() : '',
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -76,7 +74,6 @@ function CreateBrand() {
 
             var formDataImage = new FormData();
             formDataImage.append('file', fileImage);
-
 
             const resUploadFileLogo = fileService.upload(formDataLogo);
             const resUploadFileImage = fileService.upload(formDataImage);
@@ -244,7 +241,6 @@ function CreateBrand() {
                                             <div className="d-flex">
                                                 <Button
                                                     className="btn btn-icon btn-success"
-
                                                     type="submit"
                                                     style={{ minWidth: '100px' }}
                                                 >
@@ -269,7 +265,7 @@ function CreateBrand() {
             </Row>
 
             <ToastContainer />
-            {/* <ModalPopup hidden={!loading} /> */}
+            <ModalPopup hidden={!loading} />
         </Container>
     );
 }

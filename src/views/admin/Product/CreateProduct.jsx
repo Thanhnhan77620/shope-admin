@@ -63,15 +63,16 @@ function CreateProduct() {
     const inputProductName = useRef();
     const inputProductDiscount = useRef();
     const inputProductStock = useRef();
+    const inputProductPrice = useRef();
     const inputProductKeyword = useRef();
 
-    const parentId = 'tierModel'
-    const tierModelChildContainerId = 'tierModel-child-container'
-    const tierModelChildItemIdPattern = 'tierModel-child-item-'
+    const parentId = 'tierModel';
+    const tierModelChildContainerId = 'tierModel-child-container';
+    const tierModelChildItemIdPattern = 'tierModel-child-item-';
 
-    const parentId2 = 'tierModelChild'
-    const tierModelChildContainerId2 = 'tierModelChild-child-container'
-    const tierModelChildItemIdPattern2 = 'tierModelChild-child-item-'
+    const parentId2 = 'tierModelChild';
+    const tierModelChildContainerId2 = 'tierModelChild-child-container';
+    const tierModelChildItemIdPattern2 = 'tierModelChild-child-item-';
 
     const inputProductImageOnchange = (e) => {
         const file = e.target.files && e.target.files[0];
@@ -115,14 +116,15 @@ function CreateProduct() {
         };
 
         function filterParent(modeId) {
-            const result = parentKeyModels.find(a => a.id === modeId)
-            return result ? result.name : null
+            const result = parentKeyModels.find((a) => a.id === modeId);
+            return result ? result.name : null;
         }
 
         parentEl[0].childNodes.forEach((el) => {
             const model = {
                 name: el.querySelector('input[name=name]') && el.querySelector('input[name=name]').value,
-                priceBeforeDiscount: el.querySelector('input[name=price]') && +el.querySelector('input[name=price]').value,
+                priceBeforeDiscount:
+                    el.querySelector('input[name=price]') && +el.querySelector('input[name=price]').value,
                 stock: el.querySelector('input[name=stock]') && +el.querySelector('input[name=stock]').value,
                 file: el.querySelector('input[name=image]') && el.querySelector('input[name=image]').files[0],
                 parent: filterParent(el.id),
@@ -136,17 +138,14 @@ function CreateProduct() {
     const setParentModel = (parentId, containerId) => {
         const parentElContainer = document.getElementById(parentId);
         const parentEl = parentElContainer.querySelectorAll(`#${containerId}`);
-        const parentModel = []
+        const parentModel = [];
         parentEl[0].childNodes.forEach((el) => {
             if (el.querySelector('input[name=name]')) {
                 parentModel.push({ name: el.querySelector('input[name=name]').value });
             }
         });
-        setParentModels(parentModel)
-    }
-
-
-
+        setParentModels(parentModel);
+    };
 
     const handleAddModelUI = (tierModelChildContainerId, tierModelChildItemIdPattern, showFieldParent = false) => {
         const parentNode = document.getElementById(tierModelChildContainerId);
@@ -172,7 +171,9 @@ function CreateProduct() {
                                             name="name"
                                             className="form-control-alternative"
                                             placeholder="Ex: XXL"
-                                            onBlur={() => !showFieldParent && setParentModel(parentId, tierModelChildContainerId)}
+                                            onBlur={() =>
+                                                !showFieldParent && setParentModel(parentId, tierModelChildContainerId)
+                                            }
                                         />
                                     </FormGroup>
                                     <FormGroup className="mb-2">
@@ -198,19 +199,19 @@ function CreateProduct() {
                                         />
                                     </FormGroup>
 
-                                    {showFieldParent && <FormGroup className="mb-2">
-                                        <label className="form-control-label mb-1">
-                                            Parent
-                                        </label>
-                                        <MultiSelectDropdown
-                                            selectionLimit={1}
-                                            onRemove={(a, b) => handleOnRemoveParent(a, b, modelId)}
-                                            onSelect={(a, b) => handleOnSelectParent(a, b, modelId)}
-                                            options={parentModels}
-                                            placeholder="Search parent model ..."
-                                            emptyRecordMsg="Empty parent model"
-                                        />
-                                    </FormGroup>}
+                                    {showFieldParent && (
+                                        <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Parent</label>
+                                            <MultiSelectDropdown
+                                                selectionLimit={1}
+                                                onRemove={(a, b) => handleOnRemoveParent(a, b, modelId)}
+                                                onSelect={(a, b) => handleOnSelectParent(a, b, modelId)}
+                                                options={parentModels}
+                                                placeholder="Search parent model ..."
+                                                emptyRecordMsg="Empty parent model"
+                                            />
+                                        </FormGroup>
+                                    )}
                                 </Col>
 
                                 <Col style={{ flex: 1, flexShrink: 0 }}>
@@ -219,7 +220,7 @@ function CreateProduct() {
                                         accept=".jpg,.jpeg,.png"
                                         name="image"
                                         hidden
-                                        onChange={(e) => readURL(e.target, modelId, 'image-review')} //'tierModel-child-item-1', 'image-review'
+                                        onChange={(e) => readURL(e.target, modelId, '#image-review')} //'tierModel-child-item-1', 'image-review'
                                     />
                                     <FormGroup className="mb-2">
                                         <label className="form-control-label mb-1">Image</label>
@@ -235,8 +236,6 @@ function CreateProduct() {
                                             onClick={() => handleUploadImageModel(modelId)} //tierModel-child-item-1
                                         ></div>
                                     </FormGroup>
-
-
                                 </Col>
                             </Row>
                         </Col>
@@ -251,7 +250,7 @@ function CreateProduct() {
 
     const handleRemoveModelUI = (modelId) => {
         document.getElementById(modelId).remove();
-        setParentModel(parentId, tierModelChildContainerId)
+        setParentModel(parentId, tierModelChildContainerId);
     };
 
     const getBrandById = async (id) => {
@@ -264,12 +263,12 @@ function CreateProduct() {
     };
 
     const handleOnRemoveParent = (a, b, tierModelChildItemId) => {
-        serParentKeyModels(prev => ([...prev.filter(x => x.id !== tierModelChildItemId)]))
+        serParentKeyModels((prev) => [...prev.filter((x) => x.id !== tierModelChildItemId)]);
     };
 
     const handleOnSelectParent = (a, b, tierModelChildItemId) => {
-        if (parentKeyModels.findIndex(x => x.id === tierModelChildItemId) === -1) {
-            serParentKeyModels(prev => ([...prev, { id: tierModelChildItemId, name: b.name }]))
+        if (parentKeyModels.findIndex((x) => x.id === tierModelChildItemId) === -1) {
+            serParentKeyModels((prev) => [...prev, { id: tierModelChildItemId, name: b.name }]);
         }
     };
 
@@ -284,10 +283,8 @@ function CreateProduct() {
         const model = document.getElementById(modelId);
         if (input.files && input.files[0]) {
             var reader = new FileReader();
-            console.log(model.querySelectorAll('#image-review')[0]);
             reader.onload = function (e) {
-                // model.getElementsByTagName('img')[0].setAttribute('src', e.target.result);
-                model.querySelectorAll('#image-review')[0].style.backgroundImage = `url('${e.target.result}')`;
+                model.querySelectorAll(fieldName)[0].style.backgroundImage = `url('${e.target.result}')`;
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -298,7 +295,6 @@ function CreateProduct() {
         const inputFile = modelEl.querySelector('input[type=file]');
         inputFile.click();
     };
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -314,10 +310,14 @@ function CreateProduct() {
             ...productObj,
             name: inputProductName.current.value,
             discount: +inputProductDiscount.current.value,
+            priceBeforeDiscount: +inputProductPrice.current.value,
             stock: +inputProductStock.current.value,
             keywords: keyWords,
-            tierModels: [getValuesModel(parentId, tierModelChildContainerId), getValuesModel(parentId2, tierModelChildContainerId2)],
-        }
+            tierModels: [
+                getValuesModel(parentId, tierModelChildContainerId),
+                getValuesModel(parentId2, tierModelChildContainerId2),
+            ],
+        };
 
         const arrApi = [];
         // upload image product
@@ -387,8 +387,6 @@ function CreateProduct() {
                                                 className="form-control-alternative"
                                                 placeholder="Ex: Product"
                                                 type="text"
-                                            // name="name"
-                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -427,6 +425,18 @@ function CreateProduct() {
                                 <Row>
                                     <Col style={{ flex: 1 }}>
                                         <FormGroup className="mb-2">
+                                            <label className="form-control-label mb-1">Price</label>
+                                            <Input
+                                                innerRef={inputProductPrice}
+                                                type="number"
+                                                pattern="[0,9].*"
+                                                className="form-control-alternative"
+                                                placeholder="Ex: 100000"
+                                            />
+                                        </FormGroup>
+                                    </Col>
+                                    <Col style={{ flex: 1 }}>
+                                        <FormGroup className="mb-2">
                                             <label className="form-control-label mb-1">Discount</label>
                                             <Input
                                                 innerRef={inputProductDiscount}
@@ -434,7 +444,6 @@ function CreateProduct() {
                                                 pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 10%"
-                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -447,7 +456,6 @@ function CreateProduct() {
                                                 pattern="[0,9].*"
                                                 className="form-control-alternative"
                                                 placeholder="Ex: 1000"
-                                            // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                             />
                                         </FormGroup>
                                     </Col>
@@ -460,7 +468,6 @@ function CreateProduct() {
                                                     type="textarea"
                                                     className="form-control form-control-alternative"
                                                     placeholder="Ex: product01, product01"
-                                                // onChange={(e) => setBrandObj({ ...brandObj, name: e.target.value })}
                                                 />
                                             </div>
                                         </FormGroup>
@@ -517,7 +524,7 @@ function CreateProduct() {
                                     </Col>
                                 </Row>
 
-                                <div id={parentId} className='mb-2'>
+                                <div id={parentId} className="mb-2">
                                     <Row>
                                         <Col style={{ flex: 1 }}>
                                             <FormGroup className="mb-2">
@@ -553,7 +560,12 @@ function CreateProduct() {
                                                                         name="name"
                                                                         className="form-control-alternative"
                                                                         placeholder="Ex: XXL"
-                                                                        onBlur={() => setParentModel(parentId, tierModelChildContainerId)}
+                                                                        onBlur={() =>
+                                                                            setParentModel(
+                                                                                parentId,
+                                                                                tierModelChildContainerId,
+                                                                            )
+                                                                        }
                                                                     />
                                                                 </FormGroup>
                                                                 <FormGroup className="mb-2">
@@ -593,8 +605,8 @@ function CreateProduct() {
                                                                     onChange={(e) =>
                                                                         readURL(
                                                                             e.target,
-                                                                            'tierModel-child-item-1',
-                                                                            'image-review',
+                                                                            `${tierModelChildItemIdPattern}1`,
+                                                                            '#image-review',
                                                                         )
                                                                     }
                                                                 />
@@ -613,29 +625,10 @@ function CreateProduct() {
                                                                         }}
                                                                         onClick={() =>
                                                                             handleUploadImageModel(
-                                                                                'tierModel-child-item-1',
+                                                                                `${tierModelChildItemIdPattern}1`,
                                                                             )
                                                                         }
                                                                     ></div>
-
-                                                                    {/* <img
-                                                                        id="image-review"
-                                                                        src="#"
-                                                                        alt="images"
-                                                                        className="rounded shadow"
-                                                                        style={{
-                                                                            minHeight: '180px',
-                                                                            minWidth: '100%',
-                                                                            height: '180px',
-                                                                            width: '100%',
-                                                                            cursor: 'pointer',
-                                                                        }}
-                                                                        onClick={() =>
-                                                                            handleUploadImageModel(
-                                                                                'tierModel-child-item-1',
-                                                                            )
-                                                                        }
-                                                                    ></img> */}
                                                                 </FormGroup>
                                                             </Col>
                                                         </Row>
@@ -651,16 +644,17 @@ function CreateProduct() {
                                     <Button
                                         className="btn btn-icon btn-success mx-5"
                                         style={{ minWidth: '100px' }}
-                                        onClick={() => handleAddModelUI(tierModelChildContainerId, tierModelChildItemIdPattern)}
+                                        onClick={() =>
+                                            handleAddModelUI(tierModelChildContainerId, tierModelChildItemIdPattern)
+                                        }
                                     >
                                         <span className="btn-inner--text">Add Model</span>
                                     </Button>
-
                                 </div>
 
                                 <div id="tierTest"></div>
 
-                                <div id={parentId2} className='mb-2'>
+                                <div id={parentId2} className="mb-2">
                                     <Row>
                                         <Col style={{ flex: 1 }}>
                                             <FormGroup className="mb-2">
@@ -731,8 +725,20 @@ function CreateProduct() {
                                                                     </label>
                                                                     <MultiSelectDropdown
                                                                         selectionLimit={1}
-                                                                        onRemove={(a, b) => handleOnRemoveParent(a, b, `${tierModelChildItemIdPattern2}1`)}
-                                                                        onSelect={(a, b) => handleOnSelectParent(a, b, `${tierModelChildItemIdPattern2}1`)}
+                                                                        onRemove={(a, b) =>
+                                                                            handleOnRemoveParent(
+                                                                                a,
+                                                                                b,
+                                                                                `${tierModelChildItemIdPattern2}1`,
+                                                                            )
+                                                                        }
+                                                                        onSelect={(a, b) =>
+                                                                            handleOnSelectParent(
+                                                                                a,
+                                                                                b,
+                                                                                `${tierModelChildItemIdPattern2}1`,
+                                                                            )
+                                                                        }
                                                                         options={parentModels}
                                                                         placeholder="Search parent model ..."
                                                                         emptyRecordMsg="Empty parent model"
@@ -749,8 +755,8 @@ function CreateProduct() {
                                                                     onChange={(e) =>
                                                                         readURL(
                                                                             e.target,
-                                                                            'tierModel-child-item-1',
-                                                                            'image-review',
+                                                                            `${tierModelChildItemIdPattern2}1`,
+                                                                            '#image-review',
                                                                         )
                                                                     }
                                                                 />
@@ -769,7 +775,7 @@ function CreateProduct() {
                                                                         }}
                                                                         onClick={() =>
                                                                             handleUploadImageModel(
-                                                                                'tierModel-child-item-1',
+                                                                                `${tierModelChildItemIdPattern2}1`,
                                                                             )
                                                                         }
                                                                     ></div>
@@ -804,13 +810,17 @@ function CreateProduct() {
                                     <Button
                                         className="btn btn-icon btn-success mx-5"
                                         style={{ minWidth: '100px' }}
-                                        onClick={() => handleAddModelUI(tierModelChildContainerId2, tierModelChildItemIdPattern2, true)}
+                                        onClick={() =>
+                                            handleAddModelUI(
+                                                tierModelChildContainerId2,
+                                                tierModelChildItemIdPattern2,
+                                                true,
+                                            )
+                                        }
                                     >
                                         <span className="btn-inner--text">Add Model</span>
                                     </Button>
-
                                 </div>
-
 
                                 <Row>
                                     <Col style={{ flex: 1 }}>
@@ -851,7 +861,7 @@ function CreateProduct() {
             </Row>
 
             <ToastContainer />
-            {/* <ModalPopup hidden={!loading} /> */}
+            <ModalPopup hidden={!loading} />
         </Container>
     );
 }
