@@ -76,12 +76,12 @@ const ImageUploader = ({
                                         <img src={image['data_url']} alt="" style={{ width: '100%' }} />
                                         <div className="image-item__btn-wrapper mt-1">
                                             <ButtonGroup size="sm" style={{ width: '100%' }}>
-                                                {/* <Button color="primary" onClick={() => onImageUpdate(index)}>
+                                                <Button color="primary" onClick={() => onImageUpdate(index)}>
                                                     Update
                                                 </Button>
                                                 <Button color="danger" onClick={() => onImageRemove(index)}>
                                                     Remove
-                                                </Button> */}
+                                                </Button>
                                             </ButtonGroup>
                                         </div>
                                     </div>
