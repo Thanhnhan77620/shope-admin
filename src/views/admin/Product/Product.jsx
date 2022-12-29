@@ -69,17 +69,17 @@ function Product() {
         return listPaging;
     };
 
-    const handleInActive = async (e, id) => {
-        e.preventDefault();
+    const handleInActive = async (id) => {
         setLoading(true);
         const res = await productService.remove(id);
+        setLoading(false);
         if (res.status === 200) {
             toast.success('Save Successfully!');
             getProductsApi();
         } else {
             toast.error(res.errors.message);
         }
-        setLoading(false);
+
     };
 
     const handleEnterSearch = (e) => {
@@ -109,19 +109,12 @@ function Product() {
         const res = await productService.searChing(body, params);
         setLoading(false);
         if (res.status === 200) {
-            // setCurrentPage(params.page);
-            // setParams(prevPagrams => ({ ...params, page:}))
             setTotalPage(res.data.totalPages);
             setProducts(res.data.data);
         } else {
             toast.error(res.errors.message);
         }
     };
-
-    // useEffect(() => {
-
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, []);
 
     useEffect(() => {
         if (keySearch) {
@@ -222,14 +215,14 @@ function Product() {
                                             <td>{item.stock}</td>
                                             <td>{item.sold}</td>
                                             <td>
-                                                {/* <Badge color="" className="badge-dot mr-4">
+                                                <Badge color="" className="badge-dot mr-4">
                                                     {item.status.name === 'Active' ? (
                                                         <i className="bg-success" />
                                                     ) : (
                                                         <i className="bg-warning" />
                                                     )}
                                                     {item.status.name}
-                                                </Badge> */}
+                                                </Badge>
                                             </td>
                                             <td className="text-right">
                                                 <UncontrolledDropdown>
@@ -254,7 +247,7 @@ function Product() {
                                                                 handleInActive(item.id);
                                                             }}
                                                         >
-                                                            {/* {item.status.name === 'Active' ? 'InActive' : 'Active'} */}
+                                                            {item.status.name === 'Active' ? 'InActive' : 'Active'}
                                                         </DropdownItem>
                                                     </DropdownMenu>
                                                 </UncontrolledDropdown>
