@@ -777,6 +777,25 @@ function CreateProduct() {
                                                                             )
                                                                         }
                                                                     ></div>
+
+                                                                    {/* <img
+                                                                        id="image-review"
+                                                                        src="#"
+                                                                        alt="images"
+                                                                        className="rounded shadow"
+                                                                        style={{
+                                                                            minHeight: '180px',
+                                                                            minWidth: '100%',
+                                                                            height: '180px',
+                                                                            width: '100%',
+                                                                            cursor: 'pointer',
+                                                                        }}
+                                                                        onClick={() =>
+                                                                            handleUploadImageModel(
+                                                                                'tierModel-child-item-1',
+                                                                            )
+                                                                        }
+                                                                    ></img> */}
                                                                 </FormGroup>
                                                             </Col>
                                                         </Row>
@@ -801,7 +820,7 @@ function CreateProduct() {
                                     </Button>
                                 </div>
 
-                                <Row>
+                                <Row Row>
                                     <Col style={{ flex: 1 }}>
                                         <FormGroup className="mb-2">
                                             <label className="form-control-label mb-1">Descriptions</label>

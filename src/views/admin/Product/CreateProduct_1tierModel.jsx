@@ -315,7 +315,7 @@ function CreateProduct() {
             keywords: keyWords,
             tierModels: [
                 getValuesModel(parentId, tierModelChildContainerId),
-                getValuesModel(parentId2, tierModelChildContainerId2),
+                //getValuesModel(parentId2, tierModelChildContainerId2),
             ],
         };
 
@@ -651,184 +651,14 @@ function CreateProduct() {
                                         <span className="btn-inner--text">Add Model</span>
                                     </Button>
                                 </div>
-
-
-                                <div id={parentId2} className="mb-2">
-                                    <Row>
-                                        <Col style={{ flex: 1 }}>
-                                            <FormGroup className="mb-2">
-                                                <label className="form-control-label mb-1">Name Type Model Child</label>
-                                                <Input
-                                                    type="text"
-                                                    className="form-control-alternative"
-                                                    placeholder="Ex: Size"
-                                                    name="name-type-model"
-                                                />
-                                            </FormGroup>
-                                        </Col>
-                                    </Row>
-
-                                    <label className="form-control-label mb-1 mx-5">Models</label>
-
-                                    <div id={tierModelChildContainerId2}>
-                                        <div id={`${tierModelChildItemIdPattern2}1`} data-id="1">
-                                            <Card className="shadow mx-5 mb-2">
-                                                <Row
-                                                    className="pt-3 px-2 d-flex flex-column"
-                                                    id="example-collapse-text"
-                                                >
-                                                    <Col>
-                                                        <Row>
-                                                            <Col style={{ flex: 1 }}>
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Name
-                                                                    </label>
-                                                                    <Input
-                                                                        type="text"
-                                                                        name="name"
-                                                                        className="form-control-alternative"
-                                                                        placeholder="Ex: XXL"
-                                                                    />
-                                                                </FormGroup>
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Price
-                                                                    </label>
-                                                                    <Input
-                                                                        type="number"
-                                                                        pattern="[0,9].*"
-                                                                        name="price"
-                                                                        className="form-control-alternative"
-                                                                        placeholder="Ex: 100000"
-                                                                    />
-                                                                </FormGroup>
-                                                            </Col>
-                                                            <Col style={{ flex: 1 }}>
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Stock
-                                                                    </label>
-                                                                    <Input
-                                                                        type="number"
-                                                                        pattern="[0,9].*"
-                                                                        name="stock"
-                                                                        className="form-control-alternative"
-                                                                        placeholder="Ex: 100"
-                                                                    />
-                                                                </FormGroup>
-
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Parent
-                                                                    </label>
-                                                                    <MultiSelectDropdown
-                                                                        selectionLimit={1}
-                                                                        onRemove={(a, b) =>
-                                                                            handleOnRemoveParent(
-                                                                                a,
-                                                                                b,
-                                                                                `${tierModelChildItemIdPattern2}1`,
-                                                                            )
-                                                                        }
-                                                                        onSelect={(a, b) =>
-                                                                            handleOnSelectParent(
-                                                                                a,
-                                                                                b,
-                                                                                `${tierModelChildItemIdPattern2}1`,
-                                                                            )
-                                                                        }
-                                                                        options={parentModels}
-                                                                        placeholder="Search parent model ..."
-                                                                        emptyRecordMsg="Empty parent model"
-                                                                    />
-                                                                </FormGroup>
-                                                            </Col>
-
-                                                            <Col style={{ flex: 1, flexShrink: 0 }}>
-                                                                <input
-                                                                    type="file"
-                                                                    accept=".jpg,.jpeg,.png"
-                                                                    name="image"
-                                                                    hidden
-                                                                    onChange={(e) =>
-                                                                        readURL(
-                                                                            e.target,
-                                                                            `${tierModelChildItemIdPattern2}1`,
-                                                                            '#image-review',
-                                                                        )
-                                                                    }
-                                                                />
-                                                                <FormGroup className="mb-2">
-                                                                    <label className="form-control-label mb-1">
-                                                                        Image
-                                                                    </label>
-                                                                    <div
-                                                                        id="image-review"
-                                                                        className="rounded shadow"
-                                                                        style={{
-                                                                            backgroundRepeat: 'no-repeat',
-                                                                            paddingTop: '80%',
-                                                                            backgroundSize: 'cover',
-                                                                            cursor: 'pointer',
-                                                                        }}
-                                                                        onClick={() =>
-                                                                            handleUploadImageModel(
-                                                                                `${tierModelChildItemIdPattern2}1`,
-                                                                            )
-                                                                        }
-                                                                    ></div>
-
-                                                                    {/* <img
-                                                                        id="image-review"
-                                                                        src="#"
-                                                                        alt="images"
-                                                                        className="rounded shadow"
-                                                                        style={{
-                                                                            minHeight: '180px',
-                                                                            minWidth: '100%',
-                                                                            height: '180px',
-                                                                            width: '100%',
-                                                                            cursor: 'pointer',
-                                                                        }}
-                                                                        onClick={() =>
-                                                                            handleUploadImageModel(
-                                                                                'tierModel-child-item-1',
-                                                                            )
-                                                                        }
-                                                                    ></img> */}
-                                                                </FormGroup>
-                                                            </Col>
-                                                        </Row>
-                                                    </Col>
-                                                </Row>
-                                            </Card>
-                                        </div >
-                                    </div >
-
-                                    <Button
-                                        className="btn btn-icon btn-success mx-5"
-                                        style={{ minWidth: '100px' }}
-                                        onClick={() =>
-                                            handleAddModelUI(
-                                                tierModelChildContainerId2,
-                                                tierModelChildItemIdPattern2,
-                                                true,
-                                            )
-                                        }
-                                    >
-                                        <span className="btn-inner--text">Add Model</span>
-                                    </Button>
-                                </div >
-
-                                <Row Row >
+                                <Row>
                                     <Col style={{ flex: 1 }}>
                                         <FormGroup className="mb-2">
                                             <label className="form-control-label mb-1">Descriptions</label>
                                             <RichText onChange={handleOnChangeContext} />
                                         </FormGroup>
                                     </Col>
-                                </Row >
+                                </Row>
 
                                 <Row>
                                     <Col>
@@ -853,15 +683,15 @@ function CreateProduct() {
                                         </FormGroup>
                                     </Col>
                                 </Row>
-                            </Form >
-                        </CardBody >
-                    </Card >
-                </div >
-            </Row >
+                            </Form>
+                        </CardBody>
+                    </Card>
+                </div>
+            </Row>
 
             <ToastContainer />
             <ModalPopup hidden={!loading} />
-        </Container >
+        </Container>
     );
 }
 
