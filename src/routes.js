@@ -6,6 +6,7 @@ import { Banner, CreateBanner, EditBanner } from '~/views/admin/Banner';
 import { Brand, CreateBrand, EditBrand } from './views/admin/Brand';
 import { Category, CreateCategory, EditCategory } from './views/admin/Category';
 import { CreateProduct, EditProduct, Product } from './views/admin/Product';
+import { CreateOrder, EditOrder, Order } from './views/admin/Order';
 
 var routes = [
     //index
@@ -120,6 +121,30 @@ var routes = [
         name: 'Edit Product',
         icon: 'ni ni-bullet-list-67 text-red',
         component: EditProduct,
+        layout: '/admin',
+    },
+
+    // orders
+    {
+        path: '/orders',
+        name: 'Orders',
+        icon: 'ni ni-bullet-list-67 text-red',
+        component: Order,
+        layout: '/admin',
+        sideBar: true,
+    },
+    {
+        path: '/product/create',
+        name: 'Create Product',
+        icon: 'ni ni-bullet-list-67 text-red',
+        component: CreateOrder,
+        layout: '/admin',
+    },
+    {
+        path: '/product/edit/:id',
+        name: 'Edit Product',
+        icon: 'ni ni-bullet-list-67 text-red',
+        component: EditOrder,
         layout: '/admin',
     },
 

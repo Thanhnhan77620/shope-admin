@@ -20,7 +20,7 @@ const UserHeader = () => {
         <span className="mask bg-gradient-default opacity-8" />
         {/* Header container */}
         <Container className="d-flex align-items-center" fluid>
-          <Row>
+          {/* <Row>
             <Col lg="7" md="10">
               <h1 className="display-2 text-white">Hello Jesse</h1>
               <p className="text-white mt-0 mb-5">
@@ -35,7 +35,7 @@ const UserHeader = () => {
                 Edit profile
               </Button>
             </Col>
-          </Row>
+          </Row> */}
         </Container>
       </div>
     </>

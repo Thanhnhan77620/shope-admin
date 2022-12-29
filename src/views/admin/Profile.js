@@ -49,7 +49,7 @@ const Profile = () => {
               </Row>
               <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                 <div className="d-flex justify-content-between">
-                  <Button
+                  {/* <Button
                     className="mr-4"
                     color="info"
                     href="#pablo"
@@ -66,11 +66,11 @@ const Profile = () => {
                     size="sm"
                   >
                     Message
-                  </Button>
+                  </Button> */}
                 </div>
               </CardHeader>
               <CardBody className="pt-0 pt-md-4">
-                <Row>
+                {/* <Row>
                   <div className="col">
                     <div className="card-profile-stats d-flex justify-content-center mt-md-5">
                       <div>
@@ -80,7 +80,7 @@ const Profile = () => {
 
                     </div>
                   </div>
-                </Row>
+                </Row> */}
 
               </CardBody>
             </Card>
@@ -191,7 +191,7 @@ const Profile = () => {
                   <hr className="my-4" />
                   {/* Address */}
 
-                  <div className="pl-lg-4">
+                  {/* <div className="pl-lg-4">
                     <Row>
                       <Col md="12">
                         <FormGroup>
@@ -203,7 +203,7 @@ const Profile = () => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09"
+                            defaultValue={userLogin.address}
                             id="input-address"
                             placeholder="Home Address"
                             type="text"
@@ -211,7 +211,7 @@ const Profile = () => {
                         </FormGroup>
                       </Col>
                     </Row>
-                  </div>
+                  </div> */}
                 </Form>
               </CardBody>
             </Card>
