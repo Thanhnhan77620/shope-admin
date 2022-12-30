@@ -197,6 +197,11 @@ const Order = () => {
                                                         >
                                                             Cancel
                                                         </DropdownItem>
+                                                        <DropdownItem
+                                                            onClick={(e) => handleInActive(e, item.id, SUCCESSFUL)}
+                                                        >
+                                                            Success
+                                                        </DropdownItem>
                                                     </DropdownMenu>
                                                 </UncontrolledDropdown>
                                             </td>
