@@ -133,20 +133,6 @@ var routes = [
         layout: '/admin',
         sideBar: true,
     },
-    {
-        path: '/product/create',
-        name: 'Create Product',
-        icon: 'ni ni-bullet-list-67 text-red',
-        component: CreateOrder,
-        layout: '/admin',
-    },
-    {
-        path: '/product/edit/:id',
-        name: 'Edit Product',
-        icon: 'ni ni-bullet-list-67 text-red',
-        component: EditOrder,
-        layout: '/admin',
-    },
 
     //login
     {
